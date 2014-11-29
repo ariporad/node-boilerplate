@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/ariporad/node-boilerplate/issues"
   },
-  "homepage": "https://github.com/ariporad/node-boilerplate"
+  "homepage": "https://github.com/ariporad/node-boilerplate",
+  "devDependencies": {
+    "mocha": "^2.0.1"
+  }
 }
