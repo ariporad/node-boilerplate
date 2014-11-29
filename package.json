@@ -1,0 +1,19 @@
+{
+  "name": "node-boilerplate",
+  "version": "1.0.0",
+  "description": "A Boilerplate for Node.js and Express with TDD, Bootstrap & More!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ariporad/node-boilerplate.git"
+  },
+  "author": "Ari Porad <ariporad@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ariporad/node-boilerplate/issues"
+  },
+  "homepage": "https://github.com/ariporad/node-boilerplate"
+}
