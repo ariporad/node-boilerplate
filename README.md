@@ -1,6 +1,8 @@
 node-boilerplate
 ================
 
+[![Build Status](https://travis-ci.org/ariporad/node-boilerplate.png?branch=master)](https://travis-ci.org/ariporad/node-boilerplate)
+
 A Boilerplate App for Node.js That Will Have:
 - TDD
 - Code Coverage
