@@ -7,7 +7,7 @@
   </head>
   <body>
     <div id="mocha"></div>
-    <script src="../../index.js"></script>
+    <script src="../../index.js" data-cover></script>
     <script src="../../vendor/assert.js"></script>
     <script src="../../vendor/mocha/mocha.js"></script>
     <script>mocha.setup('bdd')</script>
@@ -19,7 +19,7 @@
         document.write('<script src="/testem.js">' + '<\/' + 'script>');
       }
     </script>
-    
+
     <!-- get tests and start -->
     <script src="./suite.js"></script>
     <script>

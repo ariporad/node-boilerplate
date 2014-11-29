@@ -1,7 +1,7 @@
 {
   "launchers": {
     "mocha" : {
-      "command": "node ./test/mocha/node-suite.js"
+      "command": "multi='spec=- html-cov=codecoverage.html' node ./test/mocha/node-suite.js"
     }
   }
 }
