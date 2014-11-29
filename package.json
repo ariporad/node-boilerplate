@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "multi='spec=- html-cov=codecoverage.html' node test/mocha/node-suite.js",
-    "testem": "multi='spec=- html-cov=codecoverage.html' testem -l mocha -t ./test/mocha/browser-suite.html"
+    "testem": "testem -t ./test/mocha/browser-suite.html"
   },
   "repository": {
     "type": "git",
