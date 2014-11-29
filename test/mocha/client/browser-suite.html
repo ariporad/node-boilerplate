@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>node-boilerplate mocha browser-suite</title>
+    <link rel="stylesheet" href="../../vendor/mocha/mocha.css" />
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script src="../../index.js" data-cover></script>
+    <script src="../../vendor/assert.js"></script>
+    <script src="../../vendor/mocha/mocha.js"></script>
+    <script>mocha.setup('bdd')</script>
+
+    <!-- Testem -->
+    <script>
+      if (location.href.indexOf('://localhost:7357') != -1) {
+        // testem goes between test runner setup and the tests
+        document.write('<script src="/testem.js">' + '<\/' + 'script>');
+      }
+    </script>
+
+    <!-- get tests and start -->
+    <script src="./suite.js"></script>
+    <script>
+      mocha.checkLeaks();
+      mocha.globals(['boilerplate']); // watch our boilerplate function
+      mocha.run();
+    </script>        
+  </body>
+</html>
