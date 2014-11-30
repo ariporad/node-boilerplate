@@ -3,14 +3,15 @@
 // This runs with mocha programmatically rather than from the command line.
 // how-to-with-comments taken from https://github.com/itaylor/qunit-mocha-ui
 
-var fs = require("fs");
-
 //Load Code Coverage (Blanket)
 require('blanket')({
     pattern: function (filename) {
-        return !/node_modules/.test(filename);
+        return (/node_modules/.test(filename)||/test/.test(filename)||/vendor/.test(filename)||/public/.test(filename))? false : true;
     }
 });
+
+var fs = require("fs");
+var util = require("../../lib/utils.js");
 
 //Load mocha
 var Mocha = require("mocha");
@@ -30,7 +31,10 @@ mocha.growl();
 //Run your tests
 mocha.run(function(failures){
     if(failures.length > 0){
+    	util.fail(failures)
         throw new Error(failures);
     }
     process.exit(0);
 });
+
+//TODO: FIXME: Exits zero even on test fail.
