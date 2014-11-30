@@ -4,7 +4,7 @@
   "description": "A Boilerplate for Node.js and Express with TDD, Bootstrap & More!",
   "main": "index.js",
   "scripts": {
-    "test": "multi='spec=- html-cov=codecoverage.html' node test/mocha/node-suite.js",
+    "test": "multi='spec=- html-cov=codecoverage.html' node test/mocha/runtests.js",
     "testem": "testem -t ./test/mocha/browser-suite.html"
   },
   "repository": {
