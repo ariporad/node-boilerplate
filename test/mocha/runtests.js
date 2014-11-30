@@ -29,5 +29,8 @@ mocha.growl();
 
 //Run your tests
 mocha.run(function(failures){
-  process.exit(failures);
+    if(failures.length > 0){
+        throw new Error(failures);
+    }
+    process.exit(0);
 });
