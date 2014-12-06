@@ -20,9 +20,9 @@ var Mocha = require("mocha");
 var mocha = new Mocha({ui:"bdd", reporter:"mocha-multi"});
 
 // Add all test files in `test/` directory (Hack)
-var files = fs.readdirSync(__dirname + "/server");
+var files = fs.readdirSync(__dirname + "/node");
 for (var i = files.length; i--; ) {
-    mocha.addFile(__dirname + "/server/" + files[i]);
+    mocha.addFile(__dirname + "/node/" + files[i]);
 }
 
 // Enable Growl
