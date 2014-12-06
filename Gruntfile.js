@@ -3,9 +3,10 @@ module.exports = function(grunt) {
 	// Project configuration.
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
+		banner: '<%= pkg.name %> Built on <%= grunt.template.today("mm-dd-yyyy") %>. ©2014 <%= pkg.author %>', // This banner is appended to all minified/compiled files
 		uglify: {
 			options: {
-				banner: '/*! <%= pkg.name %> <%= grunt.template.today("mm-dd-yyyy") %> */\n'
+				banner: '/*! <%= banner %> */\n'
 			},
 			build: {
 				expand: true,     // Enable dynamic expansion.
@@ -19,15 +20,16 @@ module.exports = function(grunt) {
 		stylus: {
 			compile: {
 				options:{
-					files: {
-						expand: true,     // Enable dynamic expansion.
-						cwd: 'src/stylus/',      // Src matches are relative to this path.
-						src: ['*.styl', '**/*.styl'], // Actual pattern(s) to match.
-						dest: 'build/public/css/',   // Destination path prefix.
-						ext: '.css',   // Dest filepaths will have this extension.
-						extDot: 'first'
-					}
-				}
+					banner: '/*! <%= banner %> */'
+				},
+				files: [{
+					expand: true,     // Enable dynamic expansion.
+					cwd: 'src/stylus',      // Src matches are relative to this path.
+					src: ['*.styl', '**/*.styl'], // Actual pattern(s) to match.
+					dest: 'build/public/css',   // Destination path prefix.
+					ext: '.css',   // Dest filepaths will have this extension.
+					extDot: 'first'
+				}]
 			}
 		},
 		jshint: {
@@ -56,13 +58,31 @@ module.exports = function(grunt) {
 					jquery: true // Obvious, jQuery stuff such as $
 				}
 			}
-		}
+		},
+		watch: {
+			options: {
+				livereload: true
+			},
+			js: {
+				files: '**/*.js',
+				tasks: ['jshint']
+			},
+			css: {
+				files: ['**/*.styl'],
+				tasks: []
+			},
+			views: {
+				files: ['views/**/*.*'],
+				tasks: []
+			}
+		},
 	});
 
 	// Load the plugins
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-stylus');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	// Default task(s).
 	grunt.registerTask('default', ['jshint', 'uglify', 'stylus']);

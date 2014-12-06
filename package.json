@@ -23,6 +23,7 @@
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-stylus": "^0.20.0",
     "grunt-contrib-uglify": "^0.6.0",
+    "grunt-contrib-watch": "^0.6.1",
     "mocha": "^2.0.1",
     "mocha-multi": "^0.5.0"
   },
