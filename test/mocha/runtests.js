@@ -31,7 +31,7 @@ mocha.growl();
 //Run your tests
 mocha.run(function(failures){
     if(failures.length > 0){
-    	util.fail(failures)
+    	util.fail(failures);
         throw new Error(failures);
     }
     process.exit(0);

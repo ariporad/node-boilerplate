@@ -1,4 +1,4 @@
-var utils = require("../../../lib/utils")
+var utils = require("../../../lib/utils");
 var should =  require('chai').should();
 
 // 36 * 2
@@ -12,7 +12,7 @@ describe('utils', function(){
 			utils.generateSecret.should.be.a('function');
 		});
 		it('Should return a string', function() {
-			utils.generateSecret().should.be.a('string')
+			utils.generateSecret().should.be.a('string');
 		});
 		it('It\'s return value should be 72 characters long', function() {
 			utils.generateSecret().should.have.length(72);
@@ -33,4 +33,4 @@ describe('utils', function(){
 			(function() { utils.fail("Testing 1, 2, 3") }).should.throw(Error, "Testing 1, 2, 3");
 		});
 	});
-})
+});

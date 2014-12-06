@@ -22,11 +22,11 @@ module.exports = function (app, express, server) {
 			dest: __dirname + "/../public/css",
 			force: true,
 			linenos: true
-		}))
+		}));
 	} else {
-		app.use(express.static("build/public"))
+		app.use(express.static("build/public"));
 	}
 	app.use(express.static("static"));
 	app.use(express.static("vendor"));
 	app.use(cookieParser(utils.generateSecret()));
-}
+};
