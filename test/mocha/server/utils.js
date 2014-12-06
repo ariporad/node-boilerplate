@@ -1,7 +1,10 @@
 var utils = require("../../../lib/utils");
 var should =  require('chai').should();
 
-// 36 * 2
+// This is to get everything to stop complaining about undefined variables
+
+var describe = describe || function(){};
+var it = it || function(){};
 
 describe('utils', function(){
 	describe('generateSecret()', function () {
