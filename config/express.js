@@ -1,5 +1,5 @@
 var mustacheExpress = require("mustache-express");
-var utils = require(__dirname + "/lib/utils.js");
+var utils = require(__dirname + "/../lib/utils.js");
 var cookieParser = require("cookie-parser");
 var session = require("express-session");
 var stylus = require("stylus");
