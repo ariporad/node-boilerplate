@@ -1,11 +1,6 @@
 var utils = require("../../../lib/utils");
 var should =  require('chai').should();
 
-// This is to get everything to stop complaining about undefined variables
-
-var describe = describe || function(){};
-var it = it || function(){};
-
 describe('utils', function(){
 	describe('generateSecret()', function () {
 		it('Should exist', function() {

@@ -76,6 +76,23 @@ module.exports = function(grunt) {
 				tasks: []
 			}
 		},
+		mochaTest: {
+		    test: {
+				options: {
+				    reporter: 'spec',
+				    require: 'test/mocha/node/coverage'
+				},
+				src: grunt.file.expand('test/mocha/node/**/*.js', 'test/mocha/node/*.js', '!test/mocha/node/coverage.js')
+		  	},
+		  	coverage: {
+				options: {
+					reporter: 'html-cov',
+			  		quiet: true,
+			  		captureFile: 'coverage.html'
+				},
+				src: grunt.file.expand('test/mocha/node/**/*.js', 'test/mocha/node/*.js', '!test/mocha/node/coverage.js')
+		    }
+		}
 	});
 
 	// Load the plugins
@@ -83,8 +100,12 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-stylus');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.loadNpmTasks('grunt-mocha-test');
 
 	// Default task(s).
 	grunt.registerTask('default', ['jshint', 'uglify', 'stylus']);
+	
+	// Test task
+	grunt.registerTask('test', ['jshint', 'mochaTest']);
 
 };
