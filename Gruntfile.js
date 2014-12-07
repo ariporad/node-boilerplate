@@ -91,8 +91,16 @@ module.exports = function(grunt) {
 			  		captureFile: 'coverage.html'
 				},
 				src: grunt.file.expand('test/mocha/node/**/*.js', 'test/mocha/node/*.js', '!test/mocha/node/coverage.js')
-		    }
-		}
+		    },
+		    // The travis-cov reporter will fail the tests if the
+	      	// coverage falls below the threshold configured in package.json
+	      	'travis-cov': {
+	        	options: {
+	          		reporter: 'travis-cov'
+	    		},
+	        	src: grunt.file.expand('test/mocha/node/**/*.js', 'test/mocha/node/*.js', '!test/mocha/node/coverage.js')
+	      	}
+		},
 	});
 
 	// Load the plugins
