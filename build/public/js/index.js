@@ -1,1 +1,1 @@
-/*! node-boilerplate 12-06-2014 */
+/*! node-boilerplate Built on 12-08-2014. ©2014 Ari Porad <ariporad@gmail.com> */
