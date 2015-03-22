@@ -4,7 +4,7 @@
   "description": "A Boilerplate for Node.js and Express with TDD, Bootstrap & More!",
   "main": "index.js",
   "scripts": {
-    "test": "grunt; grunt test",
+    "test": "grunt;grunt test",
     "testem": "testem -t ./test/mocha/client/browser-suite.html"
   },
   "config": {

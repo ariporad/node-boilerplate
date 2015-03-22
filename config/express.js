@@ -26,6 +26,7 @@ module.exports = function (app, express, server) {
 			force: true,
 			linenos: true
 		}));
+		app.use(express.static("src"));
 	} else {
 		app.use(express.static("build/public"));
 	}

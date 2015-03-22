@@ -1,11 +1,19 @@
 /**
- * These are the tests for /config/express.js
- * They run in development, unless you explicitly make them run in production
+ * These are the test for /xyz/abc.js
+ * Part of %%PROJECT%%
+ * © 2015 Ari Porad. All Rights Reserved.
+ */
+ 
+/**
+ * INSTRUCTIONS:
+ * 
+ * They run with NODE_ENV=development, unless you explicitly make them run with NODE_ENV=production
  * 
  * To run in production, call `production()` before calling `run()`
- * To run in development, call `development()` before calling `run()`
+ * To force it to run in development (the default), call `development()` before calling `run()`
  * 
- * To Override a global variable in the module, pass an object to run, where every key in that object is the name of a global variable, The value should be what you want to replace it with.
+ * To Override a global variable in the module, pass an object to run.
+ * Every key in that object is the name of a global variable, Which will be replaced with the value
  * 
  * Everything resets for each test, new duds, reloads the module, everything.
  */
@@ -130,7 +138,7 @@ function development(){
 function production(){
 	var p = process;
 	
-	p.env.NODE_ENV = 'production()';
+	p.env.NODE_ENV = 'production';
 	
 	express_config.__set__({
 		process: p
