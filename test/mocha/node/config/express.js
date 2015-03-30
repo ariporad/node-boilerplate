@@ -154,24 +154,35 @@ describe('config/express.js', function() {
 		express_config.should.be.a('function');
 	});
 	
-	it('should setup mustache templates', function() {
-		function mustache(){
-			return 'mustachetemplates';
+	it('should setup ejs', function() {
+		function ejs(){
+			return 'ejs';
 		}
 		
-		run({ mustacheExpress: mustache });
+		run({ ejs: ejs });
 		
 		app.__data__.data['view engine'].should.be.exist();
-		app.__data__.data['view engine'].should.be.equal('mustache');
+		app.__data__.data['view engine'].should.be.equal('ejs');
 		
-		app.__data__.engines['mustache'].should.be.exist();
-		app.__data__.engines['mustache'].should.be.equal(mustache());
+		app.__data__.engines['ejs'].should.be.exist();
+		app.__data__.engines['ejs'].should.be.equal(ejs);
 	});
 	
 	it('should set the views directory', function() {
 		run();
 		app.__data__.data.views.should.exist();
 		fs.existsSync(app.__data__.data.views).should.be.true("Views Directory Should Exist");
+	});
+	
+	describe('app.locals', function() {
+		it("should exist", function () {
+			run();
+			app.locals.should.exist();
+		});
+		it("should have .pkginfo", function() {
+			run();
+			app.locals.pkginfo.should.exist();
+		});
 	});
 	
 	describe('Middleware', function() {
