@@ -1,8 +1,9 @@
-module.exports = exports = function (app, express, server) {
+module.exports = exports = function (app, express, server, dir) {
 	var modules = {};
+	dir = dir || __dirname
 	
 	// Walk this directory recrusivly, and make a list of all the module you find
-	utils.walk(__dirname + "/").forEach(function(file) {
+	utils.walk(dir + "/").forEach(function(file) {
 		if (file.split(".").last === "js" && file !== 'loader.js') {
 			var name = file.replace('.js', '');
 			modules[name] = require('./' + file);
