@@ -1,7 +1,3 @@
-var utils = require("./../lib/utils");
-
-require("./../config/global.js");
-
 module.exports = exports = function (app, express, server) {
 	var modules = {};
 	utils.walk(__dirname + "/").forEach(function(file) {
