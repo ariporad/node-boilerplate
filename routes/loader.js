@@ -10,6 +10,11 @@ module.exports = exports = function (app, express, server, dir) {
 		}
 	});
 	
+	// And now we sort them
+	modules.sort(function (a, b) {
+		return ( a.priority || 0 ) - ( b.priority || 0 );
+	});
+	
 	// For each one
 	for (var i = 0; i < modules.length; i++) {
 		var route = modules[i];
