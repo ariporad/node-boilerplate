@@ -1,6 +1,6 @@
 module.exports = exports = function (app, express, server, dir) {
 	var modules = {};
-	dir = dir || __dirname
+	dir = dir || __dirname;
 	
 	// Walk this directory recrusivly, and make a list of all the module you find
 	utils.walk(dir + "/").forEach(function(file) {
