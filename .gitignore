@@ -82,3 +82,7 @@ sftp-config.json
 codecoverage
 coverage.html
 
+### Build Output ###
+build
+build/*
+
