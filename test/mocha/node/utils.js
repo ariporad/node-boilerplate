@@ -32,7 +32,6 @@ describe('utils', function(){
 		});
 	});
 	
-	
 	describe('removeDuplicates()', function() {
 		var array 				= [1, 2, 3, 4, 5], 
 			arrayWithDuplicates = [1, 2, 3, 4, 5, 1, 2, 3, 4, 5];
@@ -56,6 +55,10 @@ describe('utils', function(){
 			var original = arrayWithDuplicates.slice(0);
 			arrayWithDuplicates.should.eql(original);
 		});
+	});
+	
+	describe('walk()', function () {
+	
 	});
 });
 
