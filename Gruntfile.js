@@ -1,4 +1,4 @@
-module.exports = function(grunt) {
+promodule.exports = function(grunt) {
 
 	// Project configuration.
 	grunt.initConfig({
