@@ -46,7 +46,7 @@ var CLIENT_FILES_WITH_VENDOR_AND_TESTS = CLIENT_FILES_WITH_TESTS.concat(VENDOR_F
 // Node files are all .js files that are *not* client or vendor files
 var NODE_FILES_WITH_TESTS = ['build/**.js'].concat(NEGATE(CLIENT_FILES_WITHOUT_TESTS.concat(VENDOR_FILES)));
 var NODE_FILES_WITHOUT_TESTS = NODE_FILES_WITH_TESTS.concat(TEST_IGNORE_PATTERNS);
-var NODE_TESTS = TO_SRC(TEST_NAME_PATTERNS)
+var NODE_TESTS = TO_SRC(TEST_NAME_PATTERNS.concat(NEGATE(CLIENT_FILES_WITHOUT_TESTS.concat(VENDOR_FILES))))
 
 //
 // Stylesheets
@@ -75,6 +75,11 @@ module.exports = function (grunt) {
 			},
 			client: {
 				src: TO_SRC(CLIENT_FILES_WITH_VENDOR_AND_TESTS),
+				dest: 'build',
+				expand: true
+			},
+			nodeTests: {
+				src: TO_SRC(NODE_TESTS),
 				dest: 'build',
 				expand: true
 			},
@@ -161,6 +166,15 @@ module.exports = function (grunt) {
 
 		// Watch for changes
 		watch: {
+			livereload: {
+				options: {
+					livereload: true
+				},
+				files: [
+      'src/public/**/*.{styl,css,js}',
+      'views/**/*.*'
+    ]
+			},
 			stylesheets: {
 				files: TO_SRC(ALL_STYLESHEETS),
 				tasks: ['stylesheets']
@@ -192,6 +206,7 @@ module.exports = function (grunt) {
 			},
 		},
 
+		// Test the Nodecode™
 		mochaTest: {
 			test: {
 				options: {
@@ -227,7 +242,7 @@ module.exports = function (grunt) {
 			},
 			node: {
 				files: {
-					src: NODE_FILES_WITH_TESTS.concat('Gruntfile.js')
+					src: TO_SRC(NODE_FILES_WITH_TESTS).concat('Gruntfile.js')
 				},
 				options: {
 					node: true // Some Node.js specific stuff
@@ -235,7 +250,7 @@ module.exports = function (grunt) {
 			},
 			client: {
 				files: {
-					src: CLIENT_FILES_WITH_TESTS
+					src: TO_SRC(CLIENT_FILES_WITH_TESTS)
 				},
 				options: {
 					browser: true, // navigator and stuff, plus HTML5 APIs
@@ -244,6 +259,25 @@ module.exports = function (grunt) {
 				}
 			}
 		},
+
+		// Watch the code, start the server
+		concurrent: {
+			dev: {
+				options: {
+					logConcurrentOutput: true
+				},
+				tasks: ['watch', 'nodemon:dev']
+			}
+		},
+
+		// Automagiaclly restart the server when something changes.
+		nodemon: {
+			dev: {
+				options: {
+					file: 'build/index.js'
+				}
+			}
+		}
 	});
 
 	// load the tasks
@@ -257,16 +291,16 @@ module.exports = function (grunt) {
 	grunt.registerTask('stylesheets', 'Compiles the stylesheets.', ['copy:stylesheets', 'stylus', 'autoprefixer', 'cssmin', 'clean:stylesheets']);
 
 	// Node
-	grunt.registerTask('node', 'Compiles the JavaScript files.', ['copy:node', 'clean:node']);
-	grunt.registerTask('nodeTest', 'Compiles the JavaScript files.', ['copy:node', 'clean:node']);
+	grunt.registerTask('node', 'Compiles the JavaScript files.', ['clean:node', 'copy:node', 'jshint:node', 'clean:nodeTests']);
+	grunt.registerTask('nodeTest', 'Compiles the JavaScript files.', ['jshint:node', 'mochaTest']);
 
 	// Client
-	grunt.registerTask('client', 'Compiles the JavaScript files.', ['copy:client', 'clean:client']);
-	grunt.registerTask('clientTest', 'Compiles the JavaScript files.', ['copy:client', 'clean:client']);
+	grunt.registerTask('client', 'Compiles the JavaScript files.', ['clean:client', 'copy:client', 'jshint:client', 'browserify', 'uglify', 'clean:client']);
+	grunt.registerTask('clientTest', 'Compiles the JavaScript files.', ['jshint:client']);
 
 	grunt.registerTask('scripts', 'Compiles the JavaScript files.', ['node', 'client']);
 
-	grunt.registerTask('test', 'Tests all the code', ['copy', 'nodeTest', 'clientTest', 'clean']);
+	grunt.registerTask('test', 'Tests all the code', ['nodeTest', 'clientTest']);
 
 	grunt.registerTask('build', 'Compiles all of the assets and copies the files to the build directory.', ['clean:build', 'copy', 'stylesheets', 'scripts']);
 

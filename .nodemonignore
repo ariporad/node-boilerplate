@@ -8,8 +8,8 @@
 # logs
 ./npm_debug.log
 
-# build artifacts
-./build/*
+# Ignore src, this allows grunt to copy the new files over before nodemon restarts
+./src/*
 
 # deployment artifacts
 ./deploy/*
@@ -18,8 +18,8 @@
 .DS_Store
 
 # ignore client-side js
-./src/public/*
-./src/vendor/*
+./**/public/*
+./**/vendor/*
 
 # ignore tests
 *.test.js
