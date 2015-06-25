@@ -10,7 +10,7 @@ promodule.exports = function(grunt) {
 			},
 			build: {
 				expand: true,     // Enable dynamic expansion.
-				cwd: 'src/js/',      // Src matches are relative to this path.
+				cwd: 'src/public/js/',      // Src matches are relative to this path.
 				src: ['**/*.js'], // Actual pattern(s) to match.
 				dest: 'build/public/js/',   // Destination path prefix.
 				ext: '.js',   // Dest filepaths will have this extension.
