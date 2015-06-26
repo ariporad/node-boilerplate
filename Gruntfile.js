@@ -5,25 +5,19 @@
 //
 // Bundles
 //
-var BUNDLE_LOCATION = 'build/bundle.';
+var BUNDLE_LOCATION = 'bundle.'; // build
 
 //
 // Cleaning
 //
-var CLEAN_IGNORE_FILES = ['!' + BUNDLE_LOCATION + '**'];
+var CLEAN_IGNORE_FILES = ['!' + BUNDLE_LOCATION + '**', '!node_modules/**'];
 
 //
 // Transformations
 //
-var TO_SRC = function toSRC(array) {
-	array.map(function (i) {
-		i.replace('build/', '');
-		return 'src/' + i;
-	});
-};
 
 var NEGATE = function NEGATE(array) {
-	array.map(function (p) {
+	return array.map(function (p, i, a) {
 		return '!' + p;
 	});
 };
@@ -33,26 +27,29 @@ var NEGATE = function NEGATE(array) {
 //
 
 // Tests
-var TEST_NAME_PATTERNS = ['**.test.js', '**test.**'];
+var TEST_NAME_PATTERNS = ['**/*.test.js', '**/test.**']; // src
 var TEST_IGNORE_PATTERNS = NEGATE(TEST_NAME_PATTERNS);
 
 // Client
-var CLIENT_FILES_WITH_TESTS = ['build/public/**.js'];
+var CLIENT_FILES_WITH_TESTS = ['public/**/*.js']; // build
 var CLIENT_FILES_WITHOUT_TESTS = CLIENT_FILES_WITH_TESTS.concat(TEST_IGNORE_PATTERNS);
-var VENDOR_FILES = ['build/vendor/**.js']; // All vendor files are client. All node vendor files are via NPM.
+var CLIENT_TESTS = TEST_NAME_PATTERNS.map(function (p) {
+	return 'public/' + p;
+});
+var VENDOR_FILES = ['vendor/**/*.js']; // build // All vendor files are client. All node vendor files are via NPM.
 var CLIENT_FILES_WITH_VENDOR_AND_TESTS = CLIENT_FILES_WITH_TESTS.concat(VENDOR_FILES);
 
 // Node
 // Node files are all .js files that are *not* client or vendor files
-var NODE_FILES_WITH_TESTS = ['build/**.js'].concat(NEGATE(CLIENT_FILES_WITHOUT_TESTS.concat(VENDOR_FILES)));
+var NODE_FILES_WITH_TESTS = ['**/*.js'].concat(NEGATE(CLIENT_FILES_WITHOUT_TESTS.concat(VENDOR_FILES))); // build
 var NODE_FILES_WITHOUT_TESTS = NODE_FILES_WITH_TESTS.concat(TEST_IGNORE_PATTERNS);
-var NODE_TESTS = TO_SRC(TEST_NAME_PATTERNS.concat(NEGATE(CLIENT_FILES_WITHOUT_TESTS.concat(VENDOR_FILES))))
+var NODE_TESTS = TEST_NAME_PATTERNS.concat(NEGATE(CLIENT_FILES_WITH_VENDOR_AND_TESTS));
 
 //
 // Stylesheets
 //
-var STYLUS_FILES = ['build/**.styl'];
-var CSS_FILES = ['build/**.css'];
+var STYLUS_FILES = ['**/*.styl']; // build
+var CSS_FILES = ['**/*.css']; // build
 var ALL_STYLESHEETS = STYLUS_FILES.concat(CSS_FILES);
 
 module.exports = function (grunt) {
@@ -75,22 +72,20 @@ module.exports = function (grunt) {
 				expand: true
 			},
 			client: {
-				src: TO_SRC(CLIENT_FILES_WITH_VENDOR_AND_TESTS),
-				dest: 'build',
-				expand: true
-			},
-			nodeTests: {
-				src: TO_SRC(NODE_TESTS),
+				cwd: 'src',
+				src: CLIENT_FILES_WITH_VENDOR_AND_TESTS,
 				dest: 'build',
 				expand: true
 			},
 			node: {
-				src: TO_SRC(NODE_FILES_WITH_TESTS),
+				cwd: 'src',
+				src: NODE_FILES_WITH_TESTS,
 				dest: 'build',
 				expand: true
 			},
 			stylesheets: {
-				src: TO_SRC(STYLUS_FILES),
+				cwd: 'src',
+				src: STYLUS_FILES,
 				dest: 'build',
 				expand: true
 			}
@@ -102,16 +97,29 @@ module.exports = function (grunt) {
 				src: ['build']
 			},
 			stylesheets: {
-				src: ALL_STYLESHEETS.concat(CLEAN_IGNORE_FILES)
+				cwd: 'build',
+				src: ALL_STYLESHEETS.concat(CLEAN_IGNORE_FILES),
+				expand: true
 			},
 			client: {
-				src: CLIENT_FILES_WITH_VENDOR_AND_TESTS.concat(CLEAN_IGNORE_FILES)
+				cwd: 'build',
+				src: CLIENT_FILES_WITH_VENDOR_AND_TESTS.concat(CLEAN_IGNORE_FILES, ['vendor', 'public']),
+				expand: true
 			},
 			node: {
-				src: TEST_NAME_PATTERNS.concat(NEGATE(CLIENT_FILES_WITH_VENDOR_AND_TESTS), CLEAN_IGNORE_FILES)
+				cwd: 'build',
+				src: NODE_FILES_WITH_TESTS.concat(CLEAN_IGNORE_FILES),
+				expand: true
 			},
-			tests: {
-				src: TEST_NAME_PATTERNS.concat(CLEAN_IGNORE_FILES)
+			nodeTests: {
+				cwd: 'build',
+				src: NODE_TESTS.concat(CLEAN_IGNORE_FILES),
+				expand: true
+			},
+			clientTests: {
+				cwd: 'build',
+				src: CLIENT_TESTS.concat(CLEAN_IGNORE_FILES),
+				expand: true
 			}
 		},
 
@@ -124,10 +132,11 @@ module.exports = function (grunt) {
 				},
 				files: [{
 					expand: true,
-					//cwd: 'build',
+					cwd: 'build',
+					dest: 'build',
 					src: STYLUS_FILES,
-					//dest: 'build',
-					ext: '.css'
+					ext: '.css',
+					extDot: 'last'
     			}]
 			}
 		},
@@ -136,19 +145,21 @@ module.exports = function (grunt) {
 		autoprefixer: {
 			build: {
 				expand: true,
-				//				cwd: 'build',
+				cwd: 'build',
 				src: CSS_FILES,
-				//				dest: 'build'
+				dest: 'build'
 			}
 		},
 
 		// Minify and combine all the CSS files
 		cssmin: {
 			build: {
-				files: [{
-					src: CSS_FILES,
-					dest: BUNDLE_LOCATION + '.css'
-				}]
+				// There is no way to have a dynamic source maping that has
+				// Many input files to a single output. So we have to do this.
+				src: CSS_FILES.map(function (file) {
+					return 'build/' + file;
+				}),
+				dest: 'build/' + BUNDLE_LOCATION + '.css'
 			}
 		},
 
@@ -159,9 +170,11 @@ module.exports = function (grunt) {
 					mangle: false
 				},
 				files: [{
-					src: CLIENT_FILES_WITHOUT_TESTS,
-					dest: BUNDLE_LOCATION + '.js'
-				}]
+					// Another bug with dynamic maping. I can't figure out how
+					// to make it work in place
+					src: 'build/' + BUNDLE_LOCATION + 'js',
+					dest: 'build/' + BUNDLE_LOCATION + 'js',
+ 				}]
 			}
 		},
 
@@ -177,34 +190,56 @@ module.exports = function (grunt) {
     ]
 			},
 			stylesheets: {
-				files: TO_SRC(ALL_STYLESHEETS),
-				tasks: ['stylesheets']
-			},
-			client: {
-				files: TO_SRC(CLIENT_FILES_WITHOUT_TESTS.concat(VENDOR_FILES)),
-				tasks: ['client']
-			},
-			clientTests: {
-				files: TO_SRC(CLIENT_FILES_WITH_TESTS),
-				tasks: ['clientTests']
-			},
-			node: {
-				files: TO_SRC(NODE_FILES_WITHOUT_TESTS),
-				tasks: ['node']
-			},
-			nodeTests: {
-				files: TO_SRC(NODE_FILES_WITH_TESTS),
-				tasks: ['nodeTests']
-			},
-			copy: {
-				files: ['src/**'].concat(NEGATE(TO_SRC(
-							[].concat( // Join eveything into one array
-							CLIENT_FILES_WITH_VENDOR_AND_TESTS,
-							NODE_FILES_WITH_TESTS,
-							STYLUS_FILES))),
-					tasks: ['copy']
+				expand: true,
+				cwd: 'src',
+				src: ALL_STYLESHEETS,
+				options: {
+					tasks: ['stylesheets']
 				}
 			},
+			client: {
+				expand: true,
+				cwd: 'src',
+				src: CLIENT_FILES_WITHOUT_TESTS.concat(VENDOR_FILES),
+				options: {
+					tasks: ['client']
+				}
+			},
+			clientTests: {
+				expand: true,
+				cwd: 'src',
+				src: CLIENT_FILES_WITH_TESTS,
+				options: {
+					tasks: ['clientTests']
+				}
+			},
+			node: {
+				expand: true,
+				cwd: 'src',
+				src: NODE_FILES_WITHOUT_TESTS,
+				options: {
+					tasks: ['node']
+				}
+			},
+			nodeTests: {
+				expand: true,
+				cwd: 'src',
+				src: NODE_FILES_WITH_TESTS,
+				options: {
+					tasks: ['nodeTests']
+				}
+			},
+			copy: {
+				src: ['**'].concat(NEGATE(
+					CLIENT_FILES_WITH_VENDOR_AND_TESTS.concat(
+						NODE_FILES_WITH_TESTS,
+						STYLUS_FILES))),
+				expand: true,
+				cwd: 'src',
+				options: {
+					tasks: ['copy']
+				}
+			}
 		},
 
 		// Test the Nodecode™
@@ -214,7 +249,9 @@ module.exports = function (grunt) {
 					reporter: 'spec',
 					require: 'test.coverage.js'
 				},
-				src: NODE_TESTS
+				expand: true,
+				src: NODE_TESTS,
+				cwd: 'src'
 			},
 			coverage: {
 				options: {
@@ -222,7 +259,9 @@ module.exports = function (grunt) {
 					quiet: true,
 					captureFile: 'coverage.html'
 				},
-				src: NODE_TESTS
+				expand: true,
+				src: NODE_TESTS,
+				cwd: 'src'
 			},
 			// The travis-cov reporter will fail the tests if the
 			// coverage falls below the threshold configured in package.json
@@ -230,7 +269,9 @@ module.exports = function (grunt) {
 				options: {
 					reporter: 'travis-cov'
 				},
-				src: NODE_TESTS
+				expand: true,
+				src: NODE_TESTS,
+				cwd: 'src'
 			}
 		},
 
@@ -238,7 +279,7 @@ module.exports = function (grunt) {
 		browserify: {
 			build: {
 				src: 'build/public/js/index.js',
-				dest: BUNDLE_LOCATION + 'js',
+				dest: 'build/' + BUNDLE_LOCATION + 'js',
 				browserifyOptions: {
 					debug: grunt.config('env') === 'development'
 				}
@@ -253,17 +294,17 @@ module.exports = function (grunt) {
 				proto: true, // Allows __proto__
 			},
 			node: {
-				files: {
-					src: TO_SRC(NODE_FILES_WITH_TESTS).concat('Gruntfile.js')
-				},
+				src: NODE_FILES_WITH_TESTS.concat('../Gruntfile.js'),
+				expand: true,
+				cwd: 'src',
 				options: {
 					node: true // Some Node.js specific stuff
 				}
 			},
 			client: {
-				files: {
-					src: TO_SRC(CLIENT_FILES_WITH_TESTS)
-				},
+				src: CLIENT_FILES_WITH_TESTS,
+				expand: true,
+				cwd: 'src',
 				options: {
 					browser: true, // navigator and stuff, plus HTML5 APIs
 					devel: true, // console.log and stuff
@@ -319,7 +360,7 @@ module.exports = function (grunt) {
 
 	grunt.registerTask('test', 'Tests all the code', ['nodeTest', 'clientTest']);
 
-	grunt.registerTask('build', 'Compiles all of the assets and copies the files to the build directory.', ['clean:build', 'copy', 'stylesheets', 'scripts']);
+	grunt.registerTask('build', 'Compiles all of the assets and copies the files to the build directory.', ['clean:build', 'copy:build', 'stylesheets', 'scripts']);
 
 	grunt.registerTask('default', 'Watches the project for changes, automatically builds them and runs a server.', ['env:development', 'build', 'watch']);
 };
