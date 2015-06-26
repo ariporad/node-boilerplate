@@ -5,12 +5,13 @@
 //
 // Bundles
 //
-var BUNDLE_LOCATION = 'bundle.'; // build
+var BUNDLE_LOCATION = 'build/bundle.'; // build
 
 //
 // Cleaning
 //
-var CLEAN_IGNORE_FILES = ['!' + BUNDLE_LOCATION + '**', '!node_modules/**', '!' + __dirname + '/test.coverage.js'];
+// We have both !build/bundle.**, and !bundle.**
+var CLEAN_IGNORE_FILES = ['!' + BUNDLE_LOCATION + '**', '!' + BUNDLE_LOCATION.replace('build/', '') + '**', '!node_modules/**', '!' + __dirname + '/test.coverage.js'];
 
 //
 // Transformations
@@ -54,6 +55,8 @@ var ALL_STYLESHEETS = STYLUS_FILES.concat(CSS_FILES);
 
 module.exports = function (grunt) {
 	grunt.config('env', grunt.config('env') || process.env.NODE_ENV || 'production');
+
+	grunt.config('sourcemaps', grunt.config('env') === 'development');
 
 	// configure the tasks
 	grunt.initConfig({
@@ -127,54 +130,37 @@ module.exports = function (grunt) {
 		stylus: {
 			build: {
 				options: {
-					linenos: true,
-					compress: false
+					sourcemap: (grunt.config('sourcemaps')) ? {
+						inline: true
+					} : false
 				},
-				files: [{
-					expand: true,
-					cwd: 'build',
-					dest: 'build',
-					src: STYLUS_FILES,
-					ext: '.css',
-					extDot: 'last'
-    			}]
-			}
-		},
-
-		// Auto add vendor prefixes
-		autoprefixer: {
-			build: {
-				expand: true,
-				cwd: 'build',
-				src: CSS_FILES,
-				dest: 'build'
-			}
-		},
-
-		// Minify and combine all the CSS files
-		cssmin: {
-			build: {
-				// There is no way to have a dynamic source maping that has
-				// Many input files to a single output. So we have to do this.
-				src: CSS_FILES.map(function (file) {
+				src: ALL_STYLESHEETS.map(function (file) {
 					return 'build/' + file;
 				}),
-				dest: 'build/' + BUNDLE_LOCATION + '.css'
+				dest: BUNDLE_LOCATION + 'css'
 			}
 		},
 
-		// Uglify the JS
-		uglify: {
+		// CSS Postproccessing
+		postcss: {
+			options: {
+				map: grunt.config('sourcemaps'), // inline sourcemaps
+
+				processors: [
+        			require('pixrem')(), // add fallbacks for rem units
+        			require('autoprefixer-core')({
+						browsers: '> 5%'
+					}), // add vendor prefixes
+//        			require('cssgrace'),
+					require('postcss-font-family')(),
+					require('cssnano')() // minify the result
+      ]
+			},
 			build: {
-				options: {
-					mangle: false
-				},
-				files: [{
-					// Another bug with dynamic maping. I can't figure out how
-					// to make it work in place
-					src: 'build/' + BUNDLE_LOCATION + 'js',
-					dest: 'build/' + BUNDLE_LOCATION + 'js',
- 				}]
+				expand: true,
+				src: '**/*.css',
+				cwd: 'build',
+				dest: 'build'
 			}
 		},
 
@@ -190,52 +176,64 @@ module.exports = function (grunt) {
     ]
 			},
 			stylesheets: {
-				expand: true,
-				cwd: 'src',
-				src: ALL_STYLESHEETS,
+				files: {
+					expand: true,
+					cwd: 'src',
+					src: ALL_STYLESHEETS,
+				},
 				options: {
 					tasks: ['stylesheets']
 				}
 			},
 			client: {
-				expand: true,
-				cwd: 'src',
-				src: CLIENT_FILES_WITHOUT_TESTS.concat(VENDOR_FILES),
+				files: {
+					expand: true,
+					cwd: 'src',
+					src: CLIENT_FILES_WITHOUT_TESTS.concat(VENDOR_FILES),
+				},
 				options: {
 					tasks: ['client']
 				}
 			},
 			clientTests: {
-				expand: true,
-				cwd: 'src',
-				src: CLIENT_FILES_WITH_TESTS,
+				files: {
+					expand: true,
+					cwd: 'src',
+					src: CLIENT_FILES_WITH_TESTS,
+				},
 				options: {
 					tasks: ['clientTests']
 				}
 			},
 			node: {
-				expand: true,
-				cwd: 'src',
-				src: NODE_FILES_WITHOUT_TESTS,
+				files: {
+					expand: true,
+					cwd: 'src',
+					src: NODE_FILES_WITHOUT_TESTS,
+				},
 				options: {
 					tasks: ['node']
 				}
 			},
 			nodeTests: {
-				expand: true,
-				cwd: 'src',
-				src: NODE_FILES_WITH_TESTS,
+				files: {
+					expand: true,
+					cwd: 'src',
+					src: NODE_FILES_WITH_TESTS,
+				},
 				options: {
 					tasks: ['nodeTests']
 				}
 			},
 			copy: {
-				src: ['**'].concat(NEGATE(
-					CLIENT_FILES_WITH_VENDOR_AND_TESTS.concat(
-						NODE_FILES_WITH_TESTS,
-						STYLUS_FILES))),
-				expand: true,
-				cwd: 'src',
+				files: {
+					src: ['**'].concat(NEGATE(
+						CLIENT_FILES_WITH_VENDOR_AND_TESTS.concat(
+							NODE_FILES_WITH_TESTS,
+							STYLUS_FILES))),
+					expand: true,
+					cwd: 'src',
+				},
 				options: {
 					tasks: ['copy']
 				}
@@ -279,9 +277,12 @@ module.exports = function (grunt) {
 		browserify: {
 			build: {
 				src: 'build/public/js/index.js',
-				dest: 'build/' + BUNDLE_LOCATION + 'js',
-				browserifyOptions: {
-					debug: grunt.config('env') === 'development'
+				dest: BUNDLE_LOCATION + 'js',
+				options: {
+					browserifyOptions: {
+						debug: (grunt.config('env') === 'development')
+					},
+					transform: ['uglifyify']
 				}
 			}
 		},
@@ -346,14 +347,14 @@ module.exports = function (grunt) {
 	});
 
 	// Stylesheets
-	grunt.registerTask('stylesheets', 'Compiles the stylesheets.', ['copy:stylesheets', 'stylus', 'autoprefixer', 'cssmin', 'clean:stylesheets']);
+	grunt.registerTask('stylesheets', 'Compiles the stylesheets.', ['copy:stylesheets', 'stylus', 'postcss', 'clean:stylesheets']);
 
 	// Node
 	grunt.registerTask('node', 'Compiles the JavaScript files.', ['clean:node', 'copy:node', 'jshint:node', 'clean:nodeTests']);
 	grunt.registerTask('nodeTest', 'Compiles the JavaScript files.', ['jshint:node', 'mochaTest']);
 
 	// Client
-	grunt.registerTask('client', 'Compiles the JavaScript files.', ['clean:client', 'copy:client', 'jshint:client', 'browserify', 'uglify', 'clean:client']);
+	grunt.registerTask('client', 'Compiles the JavaScript files.', ['clean:client', 'copy:client', 'jshint:client', 'browserify', 'clean:client']);
 	grunt.registerTask('clientTest', 'Compiles the JavaScript files.', ['jshint:client']);
 
 	grunt.registerTask('scripts', 'Compiles the JavaScript files.', ['node', 'client']);
@@ -362,5 +363,5 @@ module.exports = function (grunt) {
 
 	grunt.registerTask('build', 'Compiles all of the assets and copies the files to the build directory.', ['clean:build', 'copy:build', 'stylesheets', 'scripts']);
 
-	grunt.registerTask('default', 'Watches the project for changes, automatically builds them and runs a server.', ['env:development', 'build', 'watch']);
+	grunt.registerTask('default', 'Watches the project for changes, automatically builds them and runs a server.', ['env:development', 'build', 'concurrent:dev']);
 };

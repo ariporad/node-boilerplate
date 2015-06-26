@@ -138,185 +138,149 @@ function production() {
 
 describe('config/express.js', function () {
 
-	/**
-	 * @desc resets everything, new duds, it reloads and resets the module, clears any data.
-	 */
-	beforeEach(function () {
-		express_config = rewire('./express');
-		app = makeAppDud();
-		server = makeServerDud();
-		express = makeExpressDud();
-		development();
+/**
+ * @desc resets everything, new duds, it reloads and resets the module, clears any data.
+ */
+beforeEach(function () {
+	express_config = rewire('./express');
+	app = makeAppDud();
+	server = makeServerDud();
+	express = makeExpressDud();
+	development();
+});
+
+it('should export a function', function () {
+	express_config.should.be.a('function');
+});
+
+it('should setup ejs', function () {
+	function ejs() {
+		return 'ejs';
+	}
+
+	run({
+		ejs: ejs
 	});
 
-	it('should export a function', function () {
-		express_config.should.be.a('function');
-	});
+	app.__data__.data['view engine'].should.be.exist();
+	app.__data__.data['view engine'].should.be.equal('ejs');
 
-	it('should setup ejs', function () {
-		function ejs() {
-			return 'ejs';
-		}
+	app.__data__.engines.ejs.should.be.exist();
+	app.__data__.engines.ejs.should.be.equal(ejs);
+});
 
-		run({
-			ejs: ejs
-		});
+it('should set the views directory', function () {
+	run();
+	app.__data__.data.views.should.exist();
+	fs.existsSync(app.__data__.data.views).should.be.true("Views Directory Should Exist");
+});
 
-		app.__data__.data['view engine'].should.be.exist();
-		app.__data__.data['view engine'].should.be.equal('ejs');
-
-		app.__data__.engines.ejs.should.be.exist();
-		app.__data__.engines.ejs.should.be.equal(ejs);
-	});
-
-	it('should set the views directory', function () {
+describe('app.locals', function () {
+	it("should exist", function () {
 		run();
-		app.__data__.data.views.should.exist();
-		fs.existsSync(app.__data__.data.views).should.be.true("Views Directory Should Exist");
+		app.locals.should.exist();
 	});
+	it("should have .pkginfo", function () {
+		run();
+		app.locals.pkginfo.should.exist();
+	});
+});
 
-	describe('app.locals', function () {
-		it("should exist", function () {
-			run();
-			app.locals.should.exist();
+describe('Middleware', function () {
+	describe('Session', function () {
+		it('should app.use(express-session(args))', function () {
+
+			var sessionArgs;
+
+			function sessionMiddleware(args) {
+				sessionArgs = args;
+
+				return 'session';
+			}
+
+			run({
+				'session': sessionMiddleware
+			});
+
+			app.__data__.middlewares.should.contain(sessionMiddleware());
 		});
-		it("should have .pkginfo", function () {
-			run();
-			app.locals.pkginfo.should.exist();
+
+		it('should generate a unique secret every time', function () {
+
+			var sessionArgs = {};
+
+			function sessionMiddleware(args) {
+				sessionArgs = args;
+
+				return 'session';
+			}
+			var app = {
+				set: function (key, value) {},
+				engine: function () {},
+				use: function (middleware) {}
+			};
+
+			run({
+				'session': sessionMiddleware
+			});
+
+			var oldSecret = sessionArgs.secret;
+
+			run({
+				'session': sessionMiddleware
+			});
+
+			oldSecret.should.not.equal(sessionArgs.secret);
 		});
 	});
+	describe('Cookie Parser', function () {
+		it('should app.use(express-cookieparser(uniqueSecret))', function () {
 
-	describe('Middleware', function () {
-		describe('Session', function () {
-			it('should app.use(express-session(args))', function () {
+			function cookieParser(secret) {
+				return 'cookiejar';
+			}
 
-				var sessionArgs;
-
-				function sessionMiddleware(args) {
-					sessionArgs = args;
-
-					return 'session';
-				}
-
-				run({
-					'session': sessionMiddleware
-				});
-
-				app.__data__.middlewares.should.contain(sessionMiddleware());
+			run({
+				'cookieParser': cookieParser
 			});
 
-			it('should generate a unique secret every time', function () {
-
-				var sessionArgs = {};
-
-				function sessionMiddleware(args) {
-					sessionArgs = args;
-
-					return 'session';
-				}
-				var app = {
-					set: function (key, value) {},
-					engine: function () {},
-					use: function (middleware) {}
-				};
-
-				run({
-					'session': sessionMiddleware
-				});
-
-				var oldSecret = sessionArgs.secret;
-
-				run({
-					'session': sessionMiddleware
-				});
-
-				oldSecret.should.not.equal(sessionArgs.secret);
-			});
+			app.__data__.middlewares.should.contain(cookieParser());
 		});
-		describe('Cookie Parser', function () {
-			it('should app.use(express-cookieparser(uniqueSecret))', function () {
 
-				function cookieParser(secret) {
-					return 'cookiejar';
-				}
+		it('Should always make uniqueSecret unique', function () {
 
-				run({
-					'cookieParser': cookieParser
-				});
+			var secret = '';
 
-				app.__data__.middlewares.should.contain(cookieParser());
+			function cookieParser(s) {
+				secret = s;
+			}
+
+			run({
+				'cookieParser': cookieParser
 			});
 
-			it('Should always make uniqueSecret unique', function () {
+			var oldSecret = secret;
 
-				var secret = '';
-
-				function cookieParser(s) {
-					secret = s;
-				}
-
-				run({
-					'cookieParser': cookieParser
-				});
-
-				var oldSecret = secret;
-
-				run({
-					'cookieParser': cookieParser
-				});
-
-				oldSecret.should.not.equal(secret);
+			run({
+				'cookieParser': cookieParser
 			});
+
+			oldSecret.should.not.equal(secret);
 		});
-		describe('Static Files', function () {
-			describe('express.static', function () {
-				it('Should be called for /static/', function () {
-					run();
-					app.__data__.middlewares.should.contain(express.__returns__.static + "static");
-				});
-
-				it('Should be called for /vendor/', function () {
-					run();
-					app.__data__.middlewares.should.contain(express.__returns__.static + "vendor");
-				});
-
-				it('Should be called for /build/public/ WHEN IN PRODUCTION', function () {
-					production();
-
-					run();
-					app.__data__.middlewares.should.contain(express.__returns__.static + "build/public");
-
-				});
-
-				it('Should be called for /src/ WHEN IN DEVELOPMENT', function () {
-					development();
-
-					run();
-					app.__data__.middlewares.should.contain(express.__returns__.static + "src");
-
-				});
+	});
+	describe('Static Files', function () {
+		describe('express.static', function () {
+			it('Should be called for /vendor/', function () {
+				run();
+				app.__data__.middlewares.should.contain(express.__returns__.static + path.resolve(__dirname, "../vendor"));
 			});
-		});
-		describe('Stylus', function () {
-			it('Should import & use the stylus middleware WHEN IN DEVELOPMENT', function () {
-				development();
 
-				var stylus = {
-					middleware: function (options) {
-						this.ops = options;
-					}
-				};
-
-				run({
-					stylus: stylus
-				});
-
-				fs.existsSync(stylus.ops.src).should.be.true();
-				fs.existsSync(stylus.ops.dest).should.be.true();
+			it('Should be called for /public/', function () {
+				run();
+				app.__data__.middlewares.should.contain(express.__returns__.static + path.resolve(__dirname, "../public"));
 
 			});
 		});
 	});
-
-
+});
 });
