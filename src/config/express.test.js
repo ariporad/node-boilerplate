@@ -12,7 +12,6 @@
 
 var rewire = require("rewire");
 var path = require("path");
-var basepath = path.resolve(__dirname, '../../../../');
 var fs = require('fs');
 
 require('chai').should();
@@ -143,7 +142,7 @@ describe('config/express.js', function () {
 	 * @desc resets everything, new duds, it reloads and resets the module, clears any data.
 	 */
 	beforeEach(function () {
-		express_config = rewire('../../../../config/express');
+		express_config = rewire('./express');
 		app = makeAppDud();
 		server = makeServerDud();
 		express = makeExpressDud();

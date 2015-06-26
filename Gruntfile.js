@@ -10,7 +10,7 @@ var BUNDLE_LOCATION = 'bundle.'; // build
 //
 // Cleaning
 //
-var CLEAN_IGNORE_FILES = ['!' + BUNDLE_LOCATION + '**', '!node_modules/**'];
+var CLEAN_IGNORE_FILES = ['!' + BUNDLE_LOCATION + '**', '!node_modules/**', '!' + __dirname + '/test.coverage.js'];
 
 //
 // Transformations
@@ -247,7 +247,7 @@ module.exports = function (grunt) {
 			test: {
 				options: {
 					reporter: 'spec',
-					require: 'test.coverage.js'
+					require: __dirname + '/test.coverage.js'
 				},
 				expand: true,
 				src: NODE_TESTS,

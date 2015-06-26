@@ -1,10 +1,10 @@
 var rewire = require("rewire"),
-	utils = rewire("../../../lib/utils"),
+	utils = rewire("./utils"),
 	fs = require("fs"),
 	chai = require('chai'),
 	expect = chai.expect,
 	promise = require('promise'),
-	mkdirp = promise.denodify(require("mkdirp"));
+	mkdirp = require("mkdirp");
 
 chai.should();
 
@@ -56,11 +56,12 @@ describe('utils', function () {
 			utils.removeDuplicates([1, 2, 2, 3]).should.be.an('array');
 		});
 		it('Should remove the duplicates from an array', function () {
-			utils.removeDuplicates(arrayWithDuplicates).should.eql(array);
+			utils.removeDuplicates(ArrayWithDuplicates).should.eql(Array);
 		});
 		it('Should not modify the originaly array', function () {
-			var original = arrayWithDuplicates.slice(0);
-			arrayWithDuplicates.should.eql(original);
+			var original = ArrayWithDuplicates.slice(0);
+			utils.removeDuplicates(ArrayWithDuplicates);
+			ArrayWithDuplicates.should.eql(original);
 		});
 	});
 
