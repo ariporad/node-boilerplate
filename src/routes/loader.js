@@ -1,32 +1,37 @@
+var walk = require('findit');
+
 module.exports = exports = function (app, express, server, dir) {
 	var modules = [];
 	dir = dir || __dirname;
-	
-	var walk = utils.walk;
-	
-	// Walk this directory recrusivly, and make a list of all the module you find
-	walk(dir + "/").forEach(function(file) {
+
+	// Walk this directory recrusivly, and make a list of all the modules you find
+	var walker = walk(dir);
+
+	walker.on('file', function (file, stat) {
 		if (file.split(".").last === "js" && file !== 'loader.js') {
 			var name = file.replace('.js', '');
-			modules.push({ route: name, module: require('./' + file) });
+			modules.push({
+				route: name,
+				module: require('./' + file)
+			});
 		}
 	});
-	
+
 	// And now we sort them
 	modules.sort(function (a, b) {
-		return ( a.module.priority || 0 ) - ( b.module.priority || 0 );
+		return (a.module.priority || 0) - (b.module.priority || 0);
 	});
-	
+
 	// For each one
 	for (var i = 0; i < modules.length; i++) {
-		var mod   = modules[i].mod,
+		var mod = modules[i].mod,
 			route = modules[i].route;
-		
+
 		// If it exports and init function, call it first
 		if (typeof mod.init === 'function') {
 			mod.init(app, express, server);
 		}
-		
+
 		// This is a bit complicated. I wanted to allow the modules to export other things as well,
 		// So what I did was to default to using exports[get/put/post/delete] as routes, and everything else as whatever.
 		// But then I deided to add something so that a module could use all of the other ~25 HTTP verbs express supports,

@@ -2,9 +2,7 @@ var rewire = require("rewire"),
 	utils = rewire("./utils"),
 	fs = require("fs"),
 	chai = require('chai'),
-	expect = chai.expect,
-	promise = require('promise'),
-	mkdirp = require("mkdirp");
+	expect = chai.expect;
 
 chai.should();
 
@@ -62,104 +60,6 @@ describe('utils', function () {
 			var original = ArrayWithDuplicates.slice(0);
 			utils.removeDuplicates(ArrayWithDuplicates);
 			ArrayWithDuplicates.should.eql(original);
-		});
-	});
-
-	describe('walk()', function () {
-		var AllItems = {
-				"root": {
-					"file1": false,
-					"dir1": {
-						"file1.1.cfg": false,
-						"dir1.1": {
-							"dir1.1.1": {
-								"file1.1.1.1.js": false,
-								"file1.1.1.2.js": false,
-								"file1.1.1.3.js": false,
-								"file1.1.1.4.js": false
-							},
-							"dir1.1.2": {
-								"file1.1.2.1.js": false,
-								"file1.1.2.2.boom": false,
-								"file1.1.2.3.js": false,
-								"file1.1.2.4.htm": false
-
-							}
-						},
-						"file2.png": false
-					}
-				}
-			},
-			Files;
-
-		before(function (next) {
-			var filesAndFolders = [],
-				filesWithOutFolders = [],
-				Folders, i;
-
-
-			function listAllSubitems(prefix, folderObj, includeDirs) {
-				if (includeDirs === (null || undefined)) includeDirs = false;
-
-				var output = [];
-
-				for (var item in folderObj) {
-					if (folderObj[item] === false || includeDirs) output.push(prefix + "/" + item);
-					if (folderObj[item] !== false) listAllSubitems(prefix + "/" + item, folderObj[item]);
-				}
-
-				return output;
-			}
-
-			Files = listAllSubitems("", AllItems, false);
-			AllItems = listAllSubitems("", AllItems, true);
-			Folders = AllItems.filter(function (x) {
-				return Files.indexOf(x) === -1;
-			});
-
-			for (i = 0; i < Folders.length; i++) {
-				mkdirp(Folders[i]);
-			}
-
-			for (i = 0; i < Files.length; i++) {
-
-			}
-		});
-
-		beforeEach(function () {
-			utils = rewire("../../../lib/utils");
-			var fs_dud = require("fs");
-
-			fs_dud.statSync = stat;
-			fs_dud.readdirSync = readDir;
-
-			utils.__set__({
-				fs: fs_dud
-			});
-		});
-		it("Should be a function", function () {
-			utils.walk.should.be.a('function');
-		});
-		it("Should throw an error when you don't give it an argument", function () {
-			utils.walk.should.throw(Error);
-		});
-		it("Should return all the entries in a directory", function () {
-			var items = utils.walk("root");
-			for (var item in dir.root) {
-				items.indexOf(file).should.be.greater.than(-1);
-			}
-		});
-		it("Should be recrusive", function () {
-			var items = utils.walk("root");
-			var root = {};
-			for (var i = 0; i < items.length; i++) {
-				var path = items[i].split("/");
-				var obj = root;
-				for (var I = 0; I < path.length; I++) {
-					if (I === path.length - 1) obj[path[i]] = false;
-					obj = obj[path[i]];
-				}
-			}
 		});
 	});
 });
