@@ -2,7 +2,6 @@ var ejs = require('ejs-mate');
 var utils = require(__dirname + '/../lib/utils.js');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
-var stylus = require('stylus');
 var path = require('path');
 var pkginfo = require('pkginfo')(module);
 

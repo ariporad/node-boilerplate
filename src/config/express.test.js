@@ -1,3 +1,7 @@
+/* jshint ignore:start */
+/* global describe, it, beforeEach, before, afterEach, after */
+/* jshint ignore:end */
+
 /**
  * These are the tests for /config/express.js
  * They run in development, unless you explicitly make them run in production
@@ -5,18 +9,20 @@
  * To run in production, call `production()` before calling `run()`
  * To run in development, call `development()` before calling `run()`
  *
- * To Override a global variable in the module, pass an object to run, where every key in that object is the name of a global variable, The value should be what you want to replace it with.
+ * To Override a global variable in the module, pass an object to run, where
+ * every key in that object is the name of a global variable, The value should
+ * be what you want to replace it with.
  *
  * Everything resets for each test, new duds, reloads the module, everything.
  */
 
-var rewire = require("rewire");
-var path = require("path");
+var rewire = require('rewire');
+var path = require('path');
 var fs = require('fs');
 
 require('chai').should();
 
-var express_config, app, server, express;
+var expressConfig, app, server, express;
 
 /**
  * @desc Constructor for an express dud.
@@ -29,7 +35,7 @@ function makeExpressDud() {
 		return this.__returns__.static + directory;
 	};
 
-	e.__data__ = { // The data passed in while running the module for access afterword.
+	e.__data__ = { // The passed in data for access later
 		staticDirs: []
 	};
 
@@ -65,7 +71,7 @@ function makeAppDud() {
 		return this.__returns__.engine;
 	};
 
-	a.__data__ = { // The data passed in while running the module for access afterword.
+	a.__data__ = { // The passed in data for access later
 		data: {},
 		middlewares: [],
 		engines: {}
@@ -88,7 +94,7 @@ function makeServerDud() {
 
 	// The server is not yet used, so this does nothing.
 
-	s.__data__ = { // Data put here while module is running, allowing you to access it later.
+	s.__data__ = { // The passed in data for access later
 
 	};
 
@@ -100,14 +106,15 @@ function makeServerDud() {
 }
 
 /**
- * @desc Runs express_config(app, server, express)
- * @arg Object, Each key should be the name of a global variable, each value what you want to stud it with. It will be replaced in in the module.
+ * @desc Runs expressConfig(app, server, express)
+ * @arg Object, Each key should be the name of a global variable, each value
+ * what you want to stud it with. It will be replaced in in the module.
  */
 function run(overrides) {
 	if (overrides) {
-		express_config.__set__(overrides);
+		expressConfig.__set__(overrides);
 	}
-	express_config(app, express, server);
+	expressConfig(app, express, server);
 }
 
 /**
@@ -118,7 +125,7 @@ function development() {
 
 	p.env.NODE_ENV = 'development';
 
-	express_config.__set__({
+	expressConfig.__set__({
 		process: p
 	});
 }
@@ -131,7 +138,7 @@ function production() {
 
 	p.env.NODE_ENV = 'production()';
 
-	express_config.__set__({
+	expressConfig.__set__({
 		process: p
 	});
 }
@@ -139,10 +146,10 @@ function production() {
 describe('config/express.js', function () {
 
 /**
- * @desc resets everything, new duds, it reloads and resets the module, clears any data.
+ * @desc resets everything, new duds, it reloadsthe module, clears any data.
  */
 beforeEach(function () {
-	express_config = rewire('./express');
+	expressConfig = rewire('./express');
 	app = makeAppDud();
 	server = makeServerDud();
 	express = makeExpressDud();
@@ -150,7 +157,7 @@ beforeEach(function () {
 });
 
 it('should export a function', function () {
-	express_config.should.be.a('function');
+	expressConfig.should.be.a('function');
 });
 
 it('should setup ejs', function () {
@@ -172,15 +179,19 @@ it('should setup ejs', function () {
 it('should set the views directory', function () {
 	run();
 	app.__data__.data.views.should.exist();
-	fs.existsSync(app.__data__.data.views).should.be.true("Views Directory Should Exist");
+	fs
+		.existsSync(app.__data__.data.views)
+		.should
+		.be
+		.true('Views Directory Should Exist');
 });
 
 describe('app.locals', function () {
-	it("should exist", function () {
+	it('should exist', function() {
 		run();
 		app.locals.should.exist();
 	});
-	it("should have .pkginfo", function () {
+	it('should have .pkginfo', function() {
 		run();
 		app.locals.pkginfo.should.exist();
 	});
@@ -214,11 +225,6 @@ describe('Middleware', function () {
 
 				return 'session';
 			}
-			var app = {
-				set: function (key, value) {},
-				engine: function () {},
-				use: function (middleware) {}
-			};
 
 			run({
 				'session': sessionMiddleware
@@ -272,12 +278,16 @@ describe('Middleware', function () {
 		describe('express.static', function () {
 			it('Should be called for /vendor/', function () {
 				run();
-				app.__data__.middlewares.should.contain(express.__returns__.static + path.resolve(__dirname, "../vendor"));
+				app.__data__.middlewares.should.contain(
+					express.__returns__.static +
+					path.resolve(__dirname, '../vendor'));
 			});
 
 			it('Should be called for /public/', function () {
 				run();
-				app.__data__.middlewares.should.contain(express.__returns__.static + path.resolve(__dirname, "../public"));
+				app.__data__.middlewares.should.contain(
+					express.__returns__.static +
+					path.resolve(__dirname, '../public'));
 
 			});
 		});

@@ -1,3 +1,1 @@
-console.log("hi");
-
-throw new Error("chocolate");
+console.log('hello');

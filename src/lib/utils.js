@@ -1,6 +1,4 @@
-var uuid = require("node-uuid"),
-	fs   = require("fs");
-
+var uuid = require("node-uuid");
 module.exports.generateSecret = function generateSecret() {
     return uuid.v1() + uuid.v4();
 };
