@@ -1,6 +1,6 @@
 var walk  = require('findit'),
     path = require('path'),
-    utils = require('../lib/utils');
+    utils = require('lib/utils');
 
 module.exports = exports = function(app, express, server, dir) {
 	var modules = [];
@@ -13,7 +13,7 @@ module.exports = exports = function(app, express, server, dir) {
 	walker.on('file', function(file, stat) {
 		if (file.split('.').last() === 'js' && file !== __filename) {
 			console.log('Loading Module: ' + file);
-			var name = file.replace('.js', '').replace(__dirname + '/', '');
+			var name = file.replace('.js', '').replace(__dirname + '/', 'routes/');
 			console.log({
 				route: name,
 				module: require(file)
