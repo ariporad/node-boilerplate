@@ -379,7 +379,7 @@ module.exports = function(grunt) {
 		nodemon: {
 			dev: {
 				options: {
-					file: 'build/index.js',
+					file: 'build/main.js',
 					nodeArgs: ['--debug'],
 					env: {}
 				}
