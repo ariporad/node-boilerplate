@@ -69,6 +69,14 @@ var STYLUS_FILES = ['**/*.styl']; // build
 var CSS_FILES = ['**/*.css']; // build
 var ALL_STYLESHEETS = STYLUS_FILES.concat(CSS_FILES);
 
+
+//
+// Other Tasks
+//
+var NODE_INSPECTOR_PORT = 8081;
+
+
+
 module.exports = function(grunt) {
 	grunt.config('env',
 	             grunt.config('env') ||
@@ -338,13 +346,32 @@ module.exports = function(grunt) {
 			}
 		},
 
+		// Auto open the browser
+		open: {
+			options: {
+				delay: 10 // Rough count/guess as to the startup time needed.
+			},
+			'node-inspector': {
+				path: 'http://localhost:8081',
+				app: 'Google Chrome'
+			},
+			dev: {
+				path: 'http://localhost:8080/',
+				app: 'Google Chrome'
+			}
+		},
+
 		// Watch the code, start the server
 		concurrent: {
 			dev: {
 				options: {
 					logConcurrentOutput: true
 				},
-				tasks: ['watch', 'nodemon:dev']
+				tasks: ['watch',
+				        'nodemon:dev',
+				        'node-inspector:dev',
+				        'open:node-inspector',
+				        'open:dev']
 			}
 		},
 
@@ -352,13 +379,25 @@ module.exports = function(grunt) {
 		nodemon: {
 			dev: {
 				options: {
-					file: 'build/index.js'
+					file: 'build/index.js',
+					nodeArgs: ['--debug'],
+					env: {}
+				}
+			}
+		},
+
+		'node-inspector': {
+			dev: {
+				options: {
+					'web-port': NODE_INSPECTOR_PORT,
+					'save-live-edit': true,
+					'hidden': ['node_modules']
 				}
 			}
 		}
 	});
 
-	// load the tasks
+	// load the plugins
 	require('load-grunt-tasks')(grunt);
 
 	//
@@ -422,7 +461,8 @@ module.exports = function(grunt) {
 		 'stylesheets',
 		 'scripts']);
 
-	grunt.registerTask('default',
+	grunt.registerTask('default', 'Runs the dev task', ['dev']);
+	grunt.registerTask('dev',
 	                   'Watches the project for changes, automatically builds' +
 	                   ' them and runs a server.',
 		['env:development',

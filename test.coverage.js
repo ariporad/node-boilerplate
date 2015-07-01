@@ -2,7 +2,7 @@ var ignorePatterns = [
 	/.test.js$/,
 	/test./,
 	/\/public\//, // This matches /public/, but not public. This makes sure that
-                  // it's actually in the path, not the filename
+	// it's actually in the path, not the filename
 	/\/vendor\//
 ];
 

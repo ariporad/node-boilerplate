@@ -62,4 +62,26 @@ describe('utils', function () {
 			ArrayWithDuplicates.should.eql(original);
 		});
 	});
+
+	describe('Array.prototype.last', function () {
+		var Array = [1, 2, 3, 4, 5];
+
+		it('Should exist', function () {
+			[].should.have.property('last');
+		});
+		it('Should be a function', function () {
+			[].last.should.be.a('function');
+		});
+		it('Should not return an array', function () {
+			Array.last.should.not.be.an('array');
+		});
+		it('Should return the last item of the array', function () {
+			Array.last().should.eql(5);
+		});
+		it('Should not modify the originaly array', function () {
+			var original = Array.slice(0);
+			original.last();
+			Array.should.eql(original);
+		});
+	});
 });
