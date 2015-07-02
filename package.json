@@ -2,9 +2,10 @@
   "name": "node-boilerplate",
   "version": "1.0.0",
   "description": "A Boilerplate for Node.js and Express with TDD, Bootstrap & More!",
-  "main": "src/index.js",
+  "main": "src/main.js",
   "scripts": {
-    "test": "grunt;grunt test",
+    "test": "grunt test",
+    "run": "grunt dev",
     "testem": "testem -t ./test/mocha/client/browser-suite.html"
   },
   "config": {

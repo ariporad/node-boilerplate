@@ -19,8 +19,8 @@ require('config/express')(app, express, server);
 require('routes/loader.js')(app, express, server);
 
 
-//server.listen(8080);
-//
-//console.log('server started');
+server.listen(8080);
+
+console.log('server started');
 
 
