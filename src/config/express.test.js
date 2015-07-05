@@ -20,8 +20,6 @@ var rewire = require('rewire');
 var path = require('path');
 var fs = require('fs');
 
-require('chai').should();
-
 var expressConfig, app, server, express;
 
 /**

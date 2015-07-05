@@ -1,10 +1,6 @@
 var rewire = require("rewire"),
 	utils = rewire("./utils"),
-	fs = require("fs"),
-	chai = require('chai'),
-	expect = chai.expect;
-
-chai.should();
+	fs = require("fs");
 
 describe('utils', function () {
 

@@ -275,7 +275,7 @@ module.exports = function(grunt) {
 			test: {
 				options: {
 					reporter: 'spec',
-					require: 'test.coverage'
+					require: 'test.common'
 				},
 				expand: true,
 				src: NODE_TESTS,
