@@ -1,4 +1,4 @@
-var boilerplate = require('./main');
+var main = require('./main');
 var assert =  require('assert');
 
 describe('The Server', function() {

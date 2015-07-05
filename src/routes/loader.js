@@ -2,32 +2,39 @@ var walk  = require('findit'),
     path = require('path'),
     utils = require('lib/utils');
 
-module.exports = exports = function(app, express, server, dir) {
+module.exports = function(app, express, dir) {
 	var modules = [];
 	dir = dir || __dirname;
+	var self = this;
 
-	// Walk this directory recursively, and make a list of all the modules you
-	// find
 	var walker = walk(dir);
-	console.log('Loading routes in directory: ' + dir);
 	walker.on('file', function(file, stat) {
-		if (file.split('.').last() === 'js' && file !== __filename) {
-			var name = file.replace('.js', '');
-			name = name.replace(__dirname + '/', 'routes/');
-			modules.push(require(name));
-			console.log('Loaded route: ' + file);
-		}
-
-		// And now we sort them
-		modules.sort(function(a, b) {
-			return (a.module.priority || 0) - (b.module.priority || 0);
-		});
-
-		// For each one
-		console.log(modules);
-		for (var i = 0; i < modules.length; i++) {
-			var module = modules[i];
-			module(app, express, server);
-		}
+		self._processFilename(modules, file);
 	});
+	walker.on('end', function(){
+		self._processModules(modules, app, express);
+	});
+};
+
+module.exports._sortModules = function (modules) {
+	return modules.sort(function(a, b) {
+		return (a.module.priority || 0) - (b.module.priority || 0);
+	});
+};
+
+module.exports._processModules = function (modules, app, express){
+	modules = this._sortModules(modules);
+	for (var i = 0; i < modules.length; i++) {
+		var module = modules[i];
+		module(app, express);
+	}
+};
+
+module.exports._processFilename = function (modules, filename) {
+	if (filename.split('.').last() === 'js' && filename !== __filename) {
+		var name = filename.replace('.js', '');
+		name = name.replace(__dirname, '.');
+		console.log(name);
+		//modules.push(require(name));
+	}
 };

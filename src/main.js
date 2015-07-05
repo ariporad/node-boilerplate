@@ -16,7 +16,7 @@ require('config/global'); // Global Config
 require('config/express')(app, express, server);
 
 // And finally load the routes
-require('routes/loader.js')(app, express, server);
+require('routes/loader.js')(app, express, __dirname + '/routes');
 
 
 server.listen(8080);
