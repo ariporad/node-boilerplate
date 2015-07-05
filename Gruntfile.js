@@ -89,6 +89,10 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 
+		//
+		// Build Setup
+		//
+
 		// Copy files from src to build
 		// It's a very concious design decision to copy everything here, and
 		// do all of everything in build/. It clearly sperates the build and
@@ -156,6 +160,10 @@ module.exports = function(grunt) {
 			}
 		},
 
+		//
+		// Stylesheets
+		//
+
 		// Compile the Styl(us)
 		stylus: {
 			build: {
@@ -191,6 +199,145 @@ module.exports = function(grunt) {
 				src: '**/*.css',
 				cwd: 'build',
 				dest: 'build'
+			}
+		},
+
+		//
+		// Build the JavaScript
+		//
+
+		// Bundle the client side JS
+		browserify: {
+			build: {
+				src: 'build/public/js/index.js',
+				dest: BUNDLE_LOCATION + 'js',
+				options: {
+					browserifyOptions: {
+						debug: (grunt.config('env') === 'development')
+					},
+					transform: ['uglifyify']
+				}
+			}
+		},
+
+		//
+		// Testing
+		//
+
+		// Lint the JS files
+		jshint: {
+			options: {
+				lastsemic: true, // Allows function(){ return 'Something' } <--
+			                     // Notice no ';' after return for single-line
+			                     // function
+				laxcomma: true, // Allows comma-first coding
+				proto: true // Allows __proto__
+			},
+			node: {
+				src: NODE_FILES_WITH_TESTS.concat('../Gruntfile.js'),
+				expand: true,
+				cwd: 'src',
+				options: {
+					node: true // Some Node.js specific stuff
+				}
+			},
+			client: {
+				src: CLIENT_FILES_WITH_TESTS,
+				expand: true,
+				cwd: 'src',
+				options: {
+					browser: true, // navigator and stuff, plus HTML5 APIs
+					devel: true, // console.log and stuff
+					jquery: true // Obvious, jQuery stuff such as $
+				}
+			}
+		},
+
+		// Test the Nodecode™
+		mochaTest: {
+			test: {
+				options: {
+					reporter: 'spec',
+					require: './test.setup.js'
+				},
+				expand: true,
+				src: NODE_TESTS,
+				cwd: 'src'
+			},
+			coverage: {
+				options: {
+					reporter: 'html-cov',
+					quiet: true,
+					captureFile: 'coverage.html'
+				},
+				expand: true,
+				src: NODE_TESTS,
+				cwd: 'src'
+			},
+			// The travis-cov reporter will fail the tests if the
+			// coverage falls below the threshold configured in package.json
+			'travis-cov': {
+				options: {
+					reporter: 'travis-cov'
+				},
+				expand: true,
+				src: NODE_TESTS,
+				cwd: 'src'
+			}
+		},
+
+		//
+		// Dev
+		//
+
+		// Watch the code, start the server
+		concurrent: {
+			dev: {
+				options: {
+					logConcurrentOutput: true
+				},
+				tasks: ['watch',
+				        'nodemon:dev',
+				        'node-inspector:dev',
+				        'open:node-inspector',
+				        'open:dev']
+			}
+		},
+
+		// Automagiaclly restart the server when something changes.
+		nodemon: {
+			dev: {
+				options: {
+					file: 'build/main.js',
+					nodeArgs: ['--debug'],
+					env: {}
+				}
+			}
+		},
+
+		// Debug Nodecode™
+		'node-inspector': {
+			dev: {
+				options: {
+					'web-port': NODE_INSPECTOR_PORT,
+					'save-live-edit': true,
+					'hidden': ['node_modules']
+				}
+			}
+		},
+
+		// Auto open the browser
+		open: {
+			options: {
+				delay: 10 // Rough count/guess as to the startup time needed.
+			},
+			'node-inspector': {
+				path: 'http://localhost:8081',
+				app: 'Google Chrome'
+			},
+			dev: {
+				path: 'http://localhost:8080/',
+				app: 'Google Chrome'
 			}
 		},
 
@@ -269,132 +416,6 @@ module.exports = function(grunt) {
 				}
 			}
 		},
-
-		// Test the Nodecode™
-		mochaTest: {
-			test: {
-				options: {
-					reporter: 'spec',
-					require: './test.setup.js'
-				},
-				expand: true,
-				src: NODE_TESTS,
-				cwd: 'src'
-			},
-			coverage: {
-				options: {
-					reporter: 'html-cov',
-					quiet: true,
-					captureFile: 'coverage.html'
-				},
-				expand: true,
-				src: NODE_TESTS,
-				cwd: 'src'
-			},
-			// The travis-cov reporter will fail the tests if the
-			// coverage falls below the threshold configured in package.json
-			'travis-cov': {
-				options: {
-					reporter: 'travis-cov'
-				},
-				expand: true,
-				src: NODE_TESTS,
-				cwd: 'src'
-			}
-		},
-
-		// Bundle the client side JS
-		browserify: {
-			build: {
-				src: 'build/public/js/index.js',
-				dest: BUNDLE_LOCATION + 'js',
-				options: {
-					browserifyOptions: {
-						debug: (grunt.config('env') === 'development')
-					},
-					transform: ['uglifyify']
-				}
-			}
-		},
-
-		// Lint the JS files
-		jshint: {
-			options: {
-				lastsemic: true, // Allows function(){ return 'Something' } <--
-			                     // Notice no ';' after return for single-line
-			                     // function
-				laxcomma: true, // Allows comma-first coding
-				proto: true // Allows __proto__
-			},
-			node: {
-				src: NODE_FILES_WITH_TESTS.concat('../Gruntfile.js'),
-				expand: true,
-				cwd: 'src',
-				options: {
-					node: true // Some Node.js specific stuff
-				}
-			},
-			client: {
-				src: CLIENT_FILES_WITH_TESTS,
-				expand: true,
-				cwd: 'src',
-				options: {
-					browser: true, // navigator and stuff, plus HTML5 APIs
-					devel: true, // console.log and stuff
-					jquery: true // Obvious, jQuery stuff such as $
-				}
-			}
-		},
-
-		// Auto open the browser
-		open: {
-			options: {
-				delay: 10 // Rough count/guess as to the startup time needed.
-			},
-			'node-inspector': {
-				path: 'http://localhost:8081',
-				app: 'Google Chrome'
-			},
-			dev: {
-				path: 'http://localhost:8080/',
-				app: 'Google Chrome'
-			}
-		},
-
-		// Watch the code, start the server
-		concurrent: {
-			dev: {
-				options: {
-					logConcurrentOutput: true
-				},
-				tasks: ['watch',
-				        'nodemon:dev',
-				        'node-inspector:dev',
-				        'open:node-inspector',
-				        'open:dev']
-			}
-		},
-
-		// Automagiaclly restart the server when something changes.
-		nodemon: {
-			dev: {
-				options: {
-					file: 'build/main.js',
-					nodeArgs: ['--debug'],
-					env: {}
-				}
-			}
-		},
-
-		'node-inspector': {
-			dev: {
-				options: {
-					'web-port': NODE_INSPECTOR_PORT,
-					'save-live-edit': true,
-					'hidden': ['node_modules']
-				}
-			}
-		}
 	});
 
 	// load the plugins
