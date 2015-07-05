@@ -37,7 +37,7 @@ var NEGATE = function NEGATE(array) {
 //
 
 // Tests
-var TEST_NAME_PATTERNS = ['**/*.test.js', '**/test.**']; // src
+var TEST_NAME_PATTERNS = ['**/*.test.js']; // src
 var TEST_IGNORE_PATTERNS = NEGATE(TEST_NAME_PATTERNS);
 
 // Client
@@ -275,7 +275,7 @@ module.exports = function(grunt) {
 			test: {
 				options: {
 					reporter: 'spec',
-					require: 'test.common'
+					require: './test.setup.js'
 				},
 				expand: true,
 				src: NODE_TESTS,

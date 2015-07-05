@@ -50,7 +50,6 @@
     "load-grunt-tasks": "^3.2.0",
     "mkdirp": "^0.5.1",
     "mocha": "^2.0.1",
-    "mocha-sinon": "^1.1.4",
     "pixrem": "^1.2.4",
     "postcss": "^4.1.13",
     "postcss-font-family": "^1.1.0",

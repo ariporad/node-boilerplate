@@ -16,6 +16,7 @@
  * Everything resets for each test, new duds, reloads the module, everything.
  */
 
+// Todo: Setup sinon!
 var rewire = require('rewire');
 var path = require('path');
 var fs = require('fs');
