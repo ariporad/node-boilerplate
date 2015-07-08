@@ -225,10 +225,10 @@ module.exports = function(grunt) {
 			},
 			files: {
 				expand: true,
-				cwd: 'src',
+				cwd: 'build',
 				dest: 'build',
 				src: NODE_FILES_WITH_TESTS,
-				ext: 'js',
+				ext: '.js',
 				extDot: 'last'
 			}
 		},
@@ -497,6 +497,7 @@ module.exports = function(grunt) {
 		 'scripts']);
 
 	grunt.registerTask('default', 'Runs the dev task', ['dev']);
+	grunt.registerTask('es6', ['clean', 'copy', 'babel']);
 	grunt.registerTask('dev',
 	                   'Watches the project for changes, automatically builds' +
 	                   ' them and runs a server.',
