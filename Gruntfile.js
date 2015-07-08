@@ -5,7 +5,7 @@
 //
 // Bundles
 //
-var BUNDLE_LOCATION = 'build/bundle.'; // build
+var BUNDLE_LOCATION = 'build/public/bundle.'; // build
 
 //
 // Cleaning
@@ -74,7 +74,6 @@ var ALL_STYLESHEETS = STYLUS_FILES.concat(CSS_FILES);
 // Other Tasks
 //
 var NODE_INSPECTOR_PORT = 8081;
-
 
 
 module.exports = function(grunt) {
@@ -213,10 +212,24 @@ module.exports = function(grunt) {
 				dest: BUNDLE_LOCATION + 'js',
 				options: {
 					browserifyOptions: {
-						debug: (grunt.config('env') === 'development')
+						debug: grunt.config('sourcemaps')
 					},
-					transform: ['uglifyify']
+					transform: ['babelify', 'uglifyify']
 				}
+			}
+		},
+
+		babel: {
+			options: {
+				sourceMap: grunt.config('sourcemaps') && 'inline'
+			},
+			files: {
+				expand: true,
+				cwd: 'src',
+				dest: 'build',
+				src: NODE_FILES_WITH_TESTS,
+				ext: 'js',
+				extDot: 'last'
 			}
 		},
 
@@ -231,7 +244,8 @@ module.exports = function(grunt) {
 			                     // Notice no ';' after return for single-line
 			                     // function
 				laxcomma: true, // Allows comma-first coding
-				proto: true // Allows __proto__
+				proto: true, // Allows __proto__
+				exnext: true // ES6
 			},
 			node: {
 				src: NODE_FILES_WITH_TESTS.concat('../Gruntfile.js'),
