@@ -1,79 +1,4 @@
-//
-// Some Config
-//
-
-//
-// Bundles
-//
-var BUNDLE_LOCATION = 'build/public/bundle.'; // build
-
-//
-// Cleaning
-//
-// We have both !build/bundle.**, and !bundle.**
-var CLEAN_IGNORE_FILES = ['!' +
-                          BUNDLE_LOCATION +
-                          '**',
-                          '!' +
-                          BUNDLE_LOCATION.replace('build/', '') +
-                          '**',
-                          '!node_modules/**',
-                          '!' +
-                          __dirname +
-                          '/test.coverage.js'];
-
-//
-// Transformations
-//
-
-var NEGATE = function NEGATE(array) {
-	return array.map(function(p, i, a) {
-		return '!' + p;
-	});
-};
-
-//
-// Scripts
-//
-
-// Tests
-var TEST_NAME_PATTERNS = ['**/*.test.js']; // src
-var TEST_IGNORE_PATTERNS = NEGATE(TEST_NAME_PATTERNS);
-
-// Client
-var CLIENT_FILES_WITH_TESTS = ['public/**/*.js']; // build
-var CLIENT_FILES_WITHOUT_TESTS = CLIENT_FILES_WITH_TESTS
-	.concat(TEST_IGNORE_PATTERNS);
-var CLIENT_TESTS = TEST_NAME_PATTERNS
-	.map(function(p) {
-		     return 'public/' + p;
-	     });
-var VENDOR_FILES = ['vendor/**/*.js']; // build // All vendor files are client.
-                                       // All node vendor files are via NPM.
-var CLIENT_FILES_WITH_VENDOR_AND_TESTS = CLIENT_FILES_WITH_TESTS
-	.concat(VENDOR_FILES);
-
-// Node
-// Node files are all .js files that are *not* client or vendor files
-var NODE_FILES_WITH_TESTS = ['**/*.js']
-	.concat(NEGATE(CLIENT_FILES_WITHOUT_TESTS.concat(VENDOR_FILES))); // build
-var NODE_FILES_WITHOUT_TESTS = NODE_FILES_WITH_TESTS
-	.concat(TEST_IGNORE_PATTERNS);
-var NODE_TESTS = TEST_NAME_PATTERNS
-	.concat(NEGATE(CLIENT_FILES_WITH_VENDOR_AND_TESTS));
-
-//
-// Stylesheets
-//
-var STYLUS_FILES = ['**/*.styl']; // build
-var CSS_FILES = ['**/*.css']; // build
-var ALL_STYLESHEETS = STYLUS_FILES.concat(CSS_FILES);
-
-
-//
-// Other Tasks
-//
-var NODE_INSPECTOR_PORT = 8081;
+var config = require('./Gruntconfig');
 
 
 module.exports = function(grunt) {
@@ -106,19 +31,19 @@ module.exports = function(grunt) {
 			},
 			client: {
 				cwd: 'src',
-				src: CLIENT_FILES_WITH_VENDOR_AND_TESTS,
+				src: config.client.allFiles,
 				dest: 'build',
 				expand: true
 			},
 			node: {
 				cwd: 'src',
-				src: NODE_FILES_WITH_TESTS,
+				src: config.node.files,
 				dest: 'build',
 				expand: true
 			},
 			stylesheets: {
 				cwd: 'src',
-				src: STYLUS_FILES,
+				src: config.style.stylus,
 				dest: 'build',
 				expand: true
 			}
@@ -131,30 +56,40 @@ module.exports = function(grunt) {
 			},
 			stylesheets: {
 				cwd: 'build',
-				src: ALL_STYLESHEETS.concat(CLEAN_IGNORE_FILES),
+				src: config.style.all.concat(config.clean.ignore),
 				expand: true
 			},
 			client: {
 				cwd: 'build',
-				src: CLIENT_FILES_WITH_VENDOR_AND_TESTS
-					.concat(CLEAN_IGNORE_FILES,
+				src: config.client.allFiles
+					.concat(config.clean.ignore,
 					['vendor',
 					 'public']),
 				expand: true
 			},
 			node: {
 				cwd: 'build',
-				src: NODE_FILES_WITH_TESTS.concat(CLEAN_IGNORE_FILES),
+				src: config.node.files.concat(config.clean.ignore),
+				expand: true
+			},
+			nodeES: {
+				cwd: 'build',
+				src: config.node.es.files.concat(config.clean.ignore),
 				expand: true
 			},
 			nodeTests: {
 				cwd: 'build',
-				src: NODE_TESTS.concat(CLEAN_IGNORE_FILES),
+				src: config.node.tests.concat(config.clean.ignore),
+				expand: true
+			},
+			nodeTestsES: {
+				cwd: 'build',
+				src: config.node.es.tests.concat(config.clean.ignore),
 				expand: true
 			},
 			clientTests: {
 				cwd: 'build',
-				src: CLIENT_TESTS.concat(CLEAN_IGNORE_FILES),
+				src: config.client.tests.concat(config.clean.ignore),
 				expand: true
 			}
 		},
@@ -171,10 +106,10 @@ module.exports = function(grunt) {
 						inline: true
 					} : false
 				},
-				src: ALL_STYLESHEETS.map(function(file) {
+				src: config.style.all.map(function(file) {
 					return 'build/' + file;
 				}),
-				dest: BUNDLE_LOCATION + 'css'
+				dest: config.bundle + 'css'
 			}
 		},
 
@@ -209,7 +144,7 @@ module.exports = function(grunt) {
 		browserify: {
 			build: {
 				src: 'build/public/js/index.js',
-				dest: BUNDLE_LOCATION + 'js',
+				dest: config.bundle + 'js',
 				options: {
 					browserifyOptions: {
 						debug: grunt.config('sourcemaps')
@@ -227,7 +162,7 @@ module.exports = function(grunt) {
 				expand: true,
 				cwd: 'build',
 				dest: 'build',
-				src: NODE_FILES_WITH_TESTS,
+				src: config.node.es.files,
 				ext: '.js',
 				extDot: 'last'
 			}
@@ -248,7 +183,7 @@ module.exports = function(grunt) {
 				exnext: true // ES6
 			},
 			node: {
-				src: NODE_FILES_WITH_TESTS.concat('../Gruntfile.js'),
+				src: config.node.files.concat('../Gruntfile.js'),
 				expand: true,
 				cwd: 'src',
 				options: {
@@ -256,7 +191,7 @@ module.exports = function(grunt) {
 				}
 			},
 			client: {
-				src: CLIENT_FILES_WITH_TESTS,
+				src: config.client.files,
 				expand: true,
 				cwd: 'src',
 				options: {
@@ -275,8 +210,8 @@ module.exports = function(grunt) {
 					require: './test.setup.js'
 				},
 				expand: true,
-				src: NODE_TESTS,
-				cwd: 'src'
+				src: config.node.js.tests,
+				cwd: 'build'
 			},
 			coverage: {
 				options: {
@@ -285,8 +220,8 @@ module.exports = function(grunt) {
 					captureFile: 'coverage.html'
 				},
 				expand: true,
-				src: NODE_TESTS,
-				cwd: 'src'
+				src: config.node.js.tests,
+				cwd: 'build'
 			},
 			// The travis-cov reporter will fail the tests if the
 			// coverage falls below the threshold configured in package.json
@@ -295,7 +230,7 @@ module.exports = function(grunt) {
 					reporter: 'travis-cov'
 				},
 				expand: true,
-				src: NODE_TESTS,
+				src: config.node.js.tests,
 				cwd: 'src'
 			}
 		},
@@ -333,7 +268,7 @@ module.exports = function(grunt) {
 		'node-inspector': {
 			dev: {
 				options: {
-					'web-port': NODE_INSPECTOR_PORT,
+					'web-port': config.nodeInspector.port,
 					'save-live-edit': true,
 					'hidden': ['node_modules']
 				}
@@ -370,7 +305,7 @@ module.exports = function(grunt) {
 				files: {
 					expand: true,
 					cwd: 'src',
-					src: ALL_STYLESHEETS
+					src: config.style.all
 				},
 				options: {
 					tasks: ['stylesheets']
@@ -380,7 +315,7 @@ module.exports = function(grunt) {
 				files: {
 					expand: true,
 					cwd: 'src',
-					src: CLIENT_FILES_WITHOUT_TESTS.concat(VENDOR_FILES)
+					src: config.client.noTests.concat(config.client.vendor)
 				},
 				options: {
 					tasks: ['client']
@@ -390,7 +325,7 @@ module.exports = function(grunt) {
 				files: {
 					expand: true,
 					cwd: 'src',
-					src: CLIENT_FILES_WITH_TESTS
+					src: config.client.files
 				},
 				options: {
 					tasks: ['clientTests']
@@ -400,7 +335,7 @@ module.exports = function(grunt) {
 				files: {
 					expand: true,
 					cwd: 'src',
-					src: NODE_FILES_WITHOUT_TESTS
+					src: config.node.noTests
 				},
 				options: {
 					tasks: ['node']
@@ -410,7 +345,7 @@ module.exports = function(grunt) {
 				files: {
 					expand: true,
 					cwd: 'src',
-					src: NODE_FILES_WITH_TESTS
+					src: config.node.tests
 				},
 				options: {
 					tasks: ['nodeTests']
@@ -418,10 +353,10 @@ module.exports = function(grunt) {
 			},
 			copy: {
 				files: {
-					src: ['**'].concat(NEGATE(
-						CLIENT_FILES_WITH_VENDOR_AND_TESTS.concat(
-							NODE_FILES_WITH_TESTS,
-							STYLUS_FILES))),
+					src: ['**'].concat(config.negate(
+						config.client.allFiles,
+						config.node.files,
+						config.style.all)),
 					expand: true,
 					cwd: 'src'
 				},
@@ -429,7 +364,7 @@ module.exports = function(grunt) {
 					tasks: ['copy']
 				}
 			}
-		},
+		}
 	});
 
 	// load the plugins
@@ -457,13 +392,14 @@ module.exports = function(grunt) {
 	// Node
 	grunt.registerTask('node',
 	                   'Compiles the JavaScript files.',
-		['clean:node',
+		['jshint:node',
+		 'clean:node',
 		 'copy:node',
-		 'jshint:node',
-		 'clean:nodeTests']);
+		 'babel',
+		 'clean:nodeES']);
 	grunt.registerTask('nodeTest',
 	                   'Compiles the JavaScript files.',
-		['jshint:node',
+		['node',
 		 'mochaTest']);
 
 	// Client
@@ -497,7 +433,6 @@ module.exports = function(grunt) {
 		 'scripts']);
 
 	grunt.registerTask('default', 'Runs the dev task', ['dev']);
-	grunt.registerTask('es6', ['clean', 'copy', 'babel']);
 	grunt.registerTask('dev',
 	                   'Watches the project for changes, automatically builds' +
 	                   ' them and runs a server.',
