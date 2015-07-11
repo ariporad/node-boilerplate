@@ -18,10 +18,12 @@ module.exports = function(grunt) {
 		//
 
 		// Copy files from src to build
-		// It's a very concious design decision to copy everything here, and
-		// do all of everything in build/. It clearly sperates the build and
-		// the source. You'll notice that even the patterns are only for build
-		// as there is no need to every do anything in src/.
+		// It's a very concious design decision to copy everything here,
+		// and
+		// do all of everything in build/. It clearly sperates the build
+		// and
+		// the source. You'll notice that even the patterns are only for
+		// build as there is no need to every do anything in src/.
 		copy: {
 			build: {
 				cwd: 'src',
@@ -62,9 +64,9 @@ module.exports = function(grunt) {
 			client: {
 				cwd: 'build',
 				src: config.client.allFiles
-					.concat(config.clean.ignore,
-					['vendor',
-					 'public']),
+					.concat(config.clean.ignore, ['vendor',
+				                                  'public'
+					]),
 				expand: true
 			},
 			node: {
@@ -123,7 +125,7 @@ module.exports = function(grunt) {
 					require('autoprefixer-core')({
 						browsers: '> 5%'
 					}), // add vendor prefixes
-//        			require('cssgrace'),
+					//        			require('cssgrace'),
 					require('postcss-font-family')(),
 					require('cssnano')() // minify the result
 				]
@@ -157,6 +159,40 @@ module.exports = function(grunt) {
 		babel: {
 			options: {
 				sourceMap: grunt.config('sourcemaps') && 'inline',
+				resolveModuleSource: function(src, file) {
+					var o = (function(source, filename) {
+						if (source.indexOf('./') !== -1) return source;
+
+						var path = __dirname + '/build/' + source;
+
+						if (/.*\..*$/i.test(source)) {
+							if (grunt.file.exists(path)) {
+								console.log('returning e source');
+								return __dirname + '/build/' + source;
+							} else {
+								return false;
+							}
+						} else {
+							if (grunt.file.exists(path + '.js') ||
+							    grunt.file.exists(path + '.es') ||
+							    grunt.file.exists(path + '.es6') ||
+							    grunt.file.exists(path + '.json')) {
+								console.log('returning path');
+								return path;
+							} else {
+								console.log('returning source');
+								return source;
+							}
+						}
+					})(src, file);
+
+					console.log('Input: File ' +
+					            file +
+					            ' importing module ' +
+					            src);
+					console.log('Output: ' + o);
+					return o;
+				}
 			},
 			files: {
 				expand: true,
@@ -175,9 +211,10 @@ module.exports = function(grunt) {
 		// Lint the JS files
 		jshint: {
 			options: {
-				lastsemic: true, // Allows function(){ return 'Something' } <--
-			                     // Notice no ';' after return for single-line
-			                     // function
+				lastsemic: true, // Allows function(){ return 'Something' }
+				// <--
+				// Notice no ';' after return for single-line
+				// function
 				laxcomma: true, // Allows comma-first coding
 				proto: true, // Allows __proto__
 				esnext: true // ES6
@@ -249,7 +286,8 @@ module.exports = function(grunt) {
 				        'nodemon:dev',
 				        'node-inspector:dev',
 				        'open:node-inspector',
-				        'open:dev']
+				        'open:dev'
+				]
 			}
 		},
 
@@ -277,7 +315,8 @@ module.exports = function(grunt) {
 		// Auto open the browser
 		open: {
 			options: {
-				delay: 10 // Rough count/guess as to the startup time needed.
+				delay: 10 // Rough count/guess as to the startup time
+				// needed.
 			},
 			'node-inspector': {
 				path: 'http://localhost:8081',
@@ -382,60 +421,59 @@ module.exports = function(grunt) {
 
 	// Stylesheets
 	grunt.registerTask('stylesheets',
-	                   'Compiles the stylesheets.',
-		['copy:stylesheets',
-		 'stylus',
-		 'postcss',
-		 'clean:stylesheets']);
+	                   'Compiles the stylesheets.', ['copy:stylesheets',
+	                                                 'stylus',
+	                                                 'postcss',
+	                                                 'clean:stylesheets'
+		]);
 
 	// Node
 	grunt.registerTask('node',
-	                   'Compiles the JavaScript files.',
-		['jshint:node',
-		 'clean:node',
-		 'copy:node',
-		 'babel',
-		 'clean:nodeES']);
+	                   'Compiles the JavaScript files.', ['jshint:node',
+	                                                      'clean:node',
+	                                                      'copy:node',
+	                                                      'babel',
+	                                                      'clean:nodeES'
+		]);
 	grunt.registerTask('nodeTest',
-	                   'Compiles the JavaScript files.',
-		['node',
-		 'mochaTest']);
+	                   'Compiles the JavaScript files.', ['node',
+	                                                      'mochaTest'
+		]);
 
 	// Client
 	grunt.registerTask('client',
-	                   'Compiles the JavaScript files.',
-		['clean:client',
-		 'copy:client',
-		 'jshint:client',
-		 'browserify',
-		 'clean:client']);
+	                   'Compiles the JavaScript files.', ['clean:client',
+	                                                      'copy:client',
+	                                                      'jshint:client',
+	                                                      'browserify',
+	                                                      'clean:client'
+		]);
 	grunt.registerTask('clientTest',
-	                   'Compiles the JavaScript files.',
-		['jshint:client']);
+	                   'Compiles the JavaScript files.', ['jshint:client']);
 
 	grunt.registerTask('scripts',
-	                   'Compiles the JavaScript files.',
-		['node',
-		 'client']);
+	                   'Compiles the JavaScript files.', ['node',
+	                                                      'client'
+		]);
 
 	grunt.registerTask('test',
-	                   'Tests all the code',
-		['nodeTest',
-		 'clientTest']);
+	                   'Tests all the code', ['nodeTest',
+	                                          'clientTest'
+		]);
 
 	grunt.registerTask('build',
 	                   'Compiles all of the assets and copies the files to ' +
-	                   'the build directory.',
-		['clean:build',
-		 'copy:build',
-		 'stylesheets',
-		 'scripts']);
+	                   'the build directory.', ['clean:build',
+	                                            'copy:build',
+	                                            'stylesheets',
+	                                            'scripts'
+		]);
 
 	grunt.registerTask('default', 'Runs the dev task', ['dev']);
 	grunt.registerTask('dev',
 	                   'Watches the project for changes, automatically builds' +
-	                   ' them and runs a server.',
-		['env:development',
-		 'build',
-		 'concurrent:dev']);
+	                   ' them and runs a server.', ['env:development',
+	                                                'build',
+	                                                'concurrent:dev'
+		]);
 };
