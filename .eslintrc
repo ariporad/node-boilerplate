@@ -1,4 +1,4 @@
-// From https://github.com/airbnb/javascript, but with the JSX removed.
+// From https://github.com/airbnb/javascript, but with the JSX removed, console allowed, allowing unused function params, and mocha.
 {
   "parser": "babel-eslint", // https://github.com/babel/babel-eslint
   "plugins": [
@@ -7,8 +7,10 @@
     // http://eslint.org/docs/user-guide/configuring.html#specifying-environments
     "browser": true,
     // browser global variables
-    "node": true
+    "node": true,
     // Node.js global variables and Node.js-specific rules
+    "mocha": true
+    // Mocha global function
   },
   "ecmaFeatures": {
     "arrowFunctions": true,
