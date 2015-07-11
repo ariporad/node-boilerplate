@@ -7,8 +7,6 @@ import 'babel/polyfill';
 import * as express from 'express';
 import * as http from 'http';
 
-// Note, in this file, it is not possible to require like in other files, as
-// Babel puts these above the line which allows relative requires.
 import 'config/global'; // Global Config
 import * as expressConfig from 'config/express';
 import * as loader from 'routes/loader.js';
