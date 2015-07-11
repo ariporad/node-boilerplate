@@ -156,7 +156,7 @@ module.exports = function(grunt) {
 
 		babel: {
 			options: {
-				sourceMap: grunt.config('sourcemaps') && 'inline'
+				sourceMap: grunt.config('sourcemaps') && 'inline',
 			},
 			files: {
 				expand: true,
@@ -180,7 +180,7 @@ module.exports = function(grunt) {
 			                     // function
 				laxcomma: true, // Allows comma-first coding
 				proto: true, // Allows __proto__
-				exnext: true // ES6
+				esnext: true // ES6
 			},
 			node: {
 				src: config.node.files.concat('../Gruntfile.js'),
@@ -263,7 +263,6 @@ module.exports = function(grunt) {
 				}
 			}
 		},
-
 		// Debug Nodecode™
 		'node-inspector': {
 			dev: {

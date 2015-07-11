@@ -22,15 +22,15 @@ var config = module.exports = {
 // Helpers
 //
 var negate = config.negate = function negate(paths) {
-	paths = [];
+	var Paths = [];
 	for (var i = 0; i < arguments.length; i++) {
 		var arg = arguments[i];
 		switch (typeof arg) {
 			case typeof []:
-				paths = paths.concat(arg);
+				Paths = Paths.concat(arg);
 				break;
 			case typeof 'string':
-				paths.push(arg);
+				Paths.push(arg);
 				break;
 			default:
 				break;
@@ -104,3 +104,5 @@ config.style.all = config.style.stylus.concat(config.style.css);
 // Misc.
 //
 config.nodeInspector.port = 8081;
+
+//console.log(config);

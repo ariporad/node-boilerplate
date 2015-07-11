@@ -2,7 +2,7 @@
   "name": "node-boilerplate",
   "version": "1.0.0",
   "description": "A Boilerplate for Node.js and Express with TDD, Bootstrap & More!",
-  "main": "src/main.js",
+  "main": "build/main.js",
   "scripts": {
     "test": "grunt test",
     "run": "grunt dev",
