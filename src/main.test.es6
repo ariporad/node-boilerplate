@@ -1,11 +1,10 @@
 import main from 'main';
 
-describe('The Server', function() {
-  it('Should create an Express server.', function() {
-    it('Should import Express', function() {
+describe('The Server', () => {
+  it('Should create an Express server.', () => {
+    it('Should import Express', () => {
 
     });
-    //assert.equal('fail', 'boilerplate', 'Dud test.'); //TODO: Add real
-    // tests test
+    // TODO: Add Real Tests
   });
 });

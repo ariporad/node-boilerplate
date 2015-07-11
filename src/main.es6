@@ -27,4 +27,8 @@ server.listen(8080);
 
 console.log('server started');
 
-
+module.exports = {
+  app,
+  server,
+  express,
+};
