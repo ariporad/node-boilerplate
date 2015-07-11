@@ -3,7 +3,7 @@
 /* jshint ignore:end */
 
 /**
- * These are the tests for /config/express.js
+ * These are the tests for /config/express.es6
  * They run in development, unless you explicitly make them run in production
  *
  * To run in production, call `production()` before calling `run()`
@@ -16,10 +16,11 @@
  * Everything resets for each test, new duds, reloads the module, everything.
  */
 
-// Todo: Setup sinon!
-var rewire = require('rewire');
-var path = require('path');
-var fs = require('fs');
+import * as rewire from 'rewire';
+import * as path from 'path';
+import * as fs from 'fs';
+
+// Todo: Sinon!
 
 var expressConfig, app, server, express;
 
@@ -142,10 +143,10 @@ function production() {
 	});
 }
 
-describe('config/express.js', function () {
+describe('config/express', function() {
 
 /**
- * @desc resets everything, new duds, it reloadsthe module, clears any data.
+ * @desc resets everything, new duds, it reloads the module, clears any data.
  */
 beforeEach(function () {
 	expressConfig = rewire('./express');
@@ -165,7 +166,7 @@ it('should setup ejs', function () {
 	}
 
 	run({
-		ejs: ejs
+		ejs
 	});
 
 	app.__data__.data['view engine'].should.be.exist();
@@ -190,9 +191,9 @@ describe('app.locals', function () {
 		run();
 		app.locals.should.exist();
 	});
-	it('should have .pkginfo', function() {
+	it('should have .pkg', function() {
 		run();
-		app.locals.pkginfo.should.exist();
+		app.locals.pkg.should.exist();
 	});
 });
 
@@ -261,13 +262,13 @@ describe('Middleware', function () {
 			}
 
 			run({
-				'cookieParser': cookieParser
+				cookieParser
 			});
 
 			var oldSecret = secret;
 
 			run({
-				'cookieParser': cookieParser
+				cookieParser
 			});
 
 			oldSecret.should.not.equal(secret);

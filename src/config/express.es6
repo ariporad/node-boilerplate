@@ -1,18 +1,19 @@
-var ejs = require('ejs-mate');
-var utils = require(__dirname + '/../lib/utils.js');
-var cookieParser = require('cookie-parser');
-var session = require('express-session');
-var path = require('path');
-var pkginfo = require('pkginfo')(module);
+import * as ejs from 'ejs-mate';
+import * as cookieParser from 'cookie-parser';
+import * as session from 'express-session';
+import * as path from 'path';
+import * as pkginfo from 'pkginfo';
 
-module.exports = function (app, express, server) {
+let pkg = pkginfo(module);
+
+module.exports = function(app, express) {
 	app.engine('ejs', ejs);
 
 	app.set('view engine', 'ejs');
 	app.set('views', path.resolve(__dirname, '../views'));
 
 	app.locals = {
-		pkginfo: pkginfo
+		pkg: pkg
 	};
 
 	// Middleware
