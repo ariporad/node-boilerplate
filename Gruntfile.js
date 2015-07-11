@@ -9,6 +9,10 @@ module.exports = function(grunt) {
 
 	grunt.config('sourcemaps', grunt.config('env') === 'development');
 
+	console.log(grunt.config('sourcemaps') ?
+	            'Using sourcemaps' :
+	            'No sourcemaps');
+
 	// configure the tasks
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
@@ -64,9 +68,7 @@ module.exports = function(grunt) {
 			client: {
 				cwd: 'build',
 				src: config.client.allFiles
-					.concat(config.clean.ignore, ['vendor',
-				                                  'public'
-					]),
+					.concat(config.clean.ignore, ['vendor']),
 				expand: true
 			},
 			node: {
