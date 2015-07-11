@@ -1,4 +1,4 @@
-import * as main from 'main';
+import main from 'main';
 
 describe('The Server', function() {
 	it('Should create an Express server.', function () {

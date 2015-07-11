@@ -1,8 +1,10 @@
-import * as ejs from 'ejs-mate';
-import * as cookieParser from 'cookie-parser';
-import * as session from 'express-session';
-import * as path from 'path';
-import * as pkginfo from 'pkginfo';
+import ejs from 'ejs-mate';
+import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import path from 'path';
+import pkginfo from 'pkginfo';
+
+import express from 'express';
 
 let pkg = pkginfo(module);
 

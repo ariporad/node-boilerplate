@@ -16,9 +16,9 @@
  * Everything resets for each test, new duds, reloads the module, everything.
  */
 
-import * as rewire from 'rewire';
-import * as path from 'path';
-import * as fs from 'fs';
+import rewire from 'rewire';
+import path from 'path';
+import fs from 'fs';
 
 // Todo: Sinon!
 

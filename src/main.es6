@@ -8,8 +8,8 @@ import * as express from 'express';
 import * as http from 'http';
 
 import 'config/global'; // Global Config
-import * as expressConfig from 'config/express';
-import * as loader from 'routes/loader.es6';
+import expressConfig from 'config/express';
+import loader from 'routes/loader.es6';
 
 let app = express(),
     server = http.createServer(express);
