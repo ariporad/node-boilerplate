@@ -4,22 +4,23 @@
  */
 import 'babel/polyfill';
 
-import * as express from 'express';
-import * as http from 'http';
+import express from 'express';
+import http from 'http';
+import path from 'path';
 
 import 'config/global'; // Global Config
 import expressConfig from 'config/express';
 import loader from 'routes/loader.es6';
 
-let app = express(),
-    server = http.createServer(express);
+const app = express();
+const server = http.createServer(express);
 
 
 // Express config
 expressConfig(app, express, server);
 
 // And finally load the routes
-loader(app, express, __dirname + '/routes');
+loader(app, express, path.resolve(__dirname, '/routes'));
 
 
 server.listen(8080);
