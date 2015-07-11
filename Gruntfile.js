@@ -210,6 +210,20 @@ module.exports = function(grunt) {
 		// Testing
 		//
 
+		eslint: {
+			node: {
+				src: config.node.es.files.concat(['../Gruntfile.js',
+				                                  '../Gruntconfig.js']),
+				expand: true,
+				cwd: 'src'
+			},
+			client: {
+				src: config.client.files,
+				expand: true,
+				cwd: 'src'
+			}
+		},
+
 		// Lint the JS files
 		jshint: {
 			options: {
@@ -220,7 +234,8 @@ module.exports = function(grunt) {
 				laxcomma: true, // Allows comma-first coding
 				proto: true, // Allows __proto__
 				esnext: true // ES6
-			},
+			}
+			,
 			node: {
 				src: config.node.files.concat('../Gruntfile.js'),
 				expand: true,
@@ -228,7 +243,8 @@ module.exports = function(grunt) {
 				options: {
 					node: true // Some Node.js specific stuff
 				}
-			},
+			}
+			,
 			client: {
 				src: config.client.files,
 				expand: true,
@@ -239,51 +255,59 @@ module.exports = function(grunt) {
 					jquery: true // Obvious, jQuery stuff such as $
 				}
 			}
-		},
+		}
+		,
 
-		// Test the Nodecode™
+// Test the Nodecode™
 		mochaTest: {
 			test: {
 				options: {
 					reporter: 'spec',
 					require: './test.setup.js'
-				},
+				}
+				,
 				expand: true,
 				src: config.node.js.tests,
 				cwd: 'build'
-			},
+			}
+			,
 			coverage: {
 				options: {
 					reporter: 'html-cov',
 					quiet: true,
 					captureFile: 'coverage.html'
-				},
+				}
+				,
 				expand: true,
 				src: config.node.js.tests,
 				cwd: 'build'
-			},
+			}
+			,
 			// The travis-cov reporter will fail the tests if the
 			// coverage falls below the threshold configured in package.json
 			'travis-cov': {
 				options: {
 					reporter: 'travis-cov'
-				},
+				}
+				,
 				expand: true,
 				src: config.node.js.tests,
 				cwd: 'src'
 			}
-		},
+		}
+		,
 
-		//
-		// Dev
-		//
+//
+// Dev
+//
 
-		// Watch the code, start the server
+// Watch the code, start the server
 		concurrent: {
 			dev: {
 				options: {
 					logConcurrentOutput: true
-				},
+				}
+				,
 				tasks: ['watch',
 				        'nodemon:dev',
 				        'node-inspector:dev',
@@ -291,9 +315,10 @@ module.exports = function(grunt) {
 				        'open:dev'
 				]
 			}
-		},
+		}
+		,
 
-		// Automagiaclly restart the server when something changes.
+// Automagiaclly restart the server when something changes.
 		nodemon: {
 			dev: {
 				options: {
@@ -302,8 +327,9 @@ module.exports = function(grunt) {
 					env: {}
 				}
 			}
-		},
-		// Debug Nodecode™
+		}
+		,
+// Debug Nodecode™
 		'node-inspector': {
 			dev: {
 				options: {
@@ -312,85 +338,101 @@ module.exports = function(grunt) {
 					'hidden': ['node_modules']
 				}
 			}
-		},
+		}
+		,
 
-		// Auto open the browser
+// Auto open the browser
 		open: {
 			options: {
 				delay: 10 // Rough count/guess as to the startup time
 				// needed.
-			},
+			}
+			,
 			'node-inspector': {
 				path: 'http://localhost:8081',
 				app: 'Google Chrome'
-			},
+			}
+			,
 			dev: {
 				path: 'http://localhost:8080/',
 				app: 'Google Chrome'
 			}
-		},
+		}
+		,
 
-		// Watch for changes
+// Watch for changes
 		watch: {
 			livereload: {
 				options: {
 					livereload: true
-				},
+				}
+				,
 				files: [
 					'src/public/**/*.{styl,css,js}',
 					'views/**/*.*'
 				]
-			},
+			}
+			,
 			stylesheets: {
 				files: {
 					expand: true,
 					cwd: 'src',
 					src: config.style.all
-				},
+				}
+				,
 				options: {
 					tasks: ['stylesheets']
 				}
-			},
+			}
+			,
 			client: {
 				files: {
 					expand: true,
 					cwd: 'src',
 					src: config.client.noTests.concat(config.client.vendor)
-				},
+				}
+				,
 				options: {
 					tasks: ['client']
 				}
-			},
+			}
+			,
 			clientTests: {
 				files: {
 					expand: true,
 					cwd: 'src',
 					src: config.client.files
-				},
+				}
+				,
 				options: {
 					tasks: ['clientTests']
 				}
-			},
+			}
+			,
 			node: {
 				files: {
 					expand: true,
 					cwd: 'src',
 					src: config.node.noTests
-				},
+				}
+				,
 				options: {
 					tasks: ['node']
 				}
-			},
+			}
+			,
 			nodeTests: {
 				files: {
 					expand: true,
 					cwd: 'src',
 					src: config.node.tests
-				},
+				}
+				,
 				options: {
 					tasks: ['nodeTests']
 				}
-			},
+			}
+			,
 			copy: {
 				files: {
 					src: ['**'].concat(config.negate(
@@ -399,29 +441,31 @@ module.exports = function(grunt) {
 						config.style.all)),
 					expand: true,
 					cwd: 'src'
-				},
+				}
+				,
 				options: {
 					tasks: ['copy']
 				}
 			}
 		}
-	});
+	})
+	;
 
-	// load the plugins
+// load the plugins
 	require('load-grunt-tasks')(grunt);
 
-	//
-	// Tasks
-	//
+//
+// Tasks
+//
 
-	// Set the ENV
+// Set the ENV
 	grunt.registerTask('env',
 	                   'Sets grunt config option env to the suplied argument',
 	                   function(env) {
 		                   grunt.config('env', env);
 	                   });
 
-	// Stylesheets
+// Stylesheets
 	grunt.registerTask('stylesheets',
 	                   'Compiles the stylesheets.', ['copy:stylesheets',
 	                                                 'stylus',
@@ -429,7 +473,7 @@ module.exports = function(grunt) {
 	                                                 'clean:stylesheets'
 		]);
 
-	// Node
+// Node
 	grunt.registerTask('node',
 	                   'Compiles the JavaScript files.', ['jshint:node',
 	                                                      'clean:node',
@@ -442,7 +486,7 @@ module.exports = function(grunt) {
 	                                                      'mochaTest'
 		]);
 
-	// Client
+// Client
 	grunt.registerTask('client',
 	                   'Compiles the JavaScript files.', ['clean:client',
 	                                                      'copy:client',
@@ -478,4 +522,5 @@ module.exports = function(grunt) {
 	                                                'build',
 	                                                'concurrent:dev'
 		]);
-};
+}
+;

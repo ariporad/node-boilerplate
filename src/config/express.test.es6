@@ -22,87 +22,90 @@ import fs from 'fs';
 
 // Todo: Sinon!
 
-var expressConfig, app, server, express;
+let expressConfig;
+let app;
+let server;
+let express;
 
 /**
  * @desc Constructor for an express dud.
  */
 function makeExpressDud() {
-	var e = {};
+  const e = {};
 
-	e.static = function (directory) {
-		this.__data__.staticDirs.push(directory);
-		return this.__returns__.static + directory;
-	};
+  e.staticFiles = (directory) => {
+    this.__data__.staticDirs.push(directory);
+    return this.__returns__.staticFiles + directory;
+  };
 
-	e.__data__ = { // The passed in data for access later
-		staticDirs: []
-	};
+  e.__data__ = { // The passed in data for access later
+    staticDirs: [],
+  };
 
-	e.__returns__ = { // The values returned by the duds
-		static: 'static:'
-	};
+  e.__returns__ = { // The values returned by the duds
+    staticFiles: 'static:',
+  };
 
-	return e;
+  return e;
 }
 
 /**
  * @desc Constructor for an App Dud.
  */
 function makeAppDud() {
-	var a = {};
+  const a = {};
 
-	a.set = function (key, value) {
-		this.__data__.data[key] = value;
-		return this.__returns__.set;
-	};
+  a.set = (key, value) => {
+    this.__data__.data[key] = value;
+    return this.__returns__.set;
+  };
 
-	a.get = function (key) {
-		return this.__data__.data[key];
-	};
+  a.get = (key) => {
+    return this.__data__.data[key];
+  };
 
-	a.use = function (middleware) {
-		this.__data__.middlewares.push(middleware);
-		return this.__returns__.use;
-	};
+  a.use = (middleware) => {
+    this.__data__.middlewares.push(middleware);
+    return this.__returns__.use;
+  };
 
-	a.engine = function (name, engine) {
-		this.__data__.engines[name] = engine;
-		return this.__returns__.engine;
-	};
+  a.engine = (name, engine) => {
+    this.__data__.engines[name] = engine;
+    return this.__returns__.engine;
+  };
 
-	a.__data__ = { // The passed in data for access later
-		data: {},
-		middlewares: [],
-		engines: {}
-	};
+  a.__data__ = { // The passed in data for access later
+    data: {},
+    middlewares: [],
+    engines: {},
+  };
 
-	a.__returns__ = { // The values returned by the duds
-		set: 'SetAValue',
-		use: 'UseUsetoUseThings',
-		engine: 'V2, V4, V6, V8, V10, V12 or AC Induction?'
-	};
+  a.__returns__ = { // The values returned by the duds
+    set: 'SetAValue',
+    use: 'UseUsetoUseThings',
+    engine: 'V2, V4, V6, V8, V10, V12 or AC Induction?',
+  };
 
-	return a;
+  return a;
 }
 
 /**
  * @desc Constructor function for a server dud
  */
 function makeServerDud() {
-	var s = {};
+  const s = {};
 
-	// The server is not yet used, so this does nothing.
+  // The server is not yet used, so this does nothing.
 
-	s.__data__ = { // The passed in data for access later
+  s.__data__ = { // The passed in data for access later
 
-	};
+  };
 
-	s.__returns__ = { // The Dud values that the methods return.
+  s.__returns__ = { // The Dud values that the methods return.
 
-	};
+  };
 
-	return s;
+  return s;
 }
 
 /**
@@ -111,186 +114,164 @@ function makeServerDud() {
  * what you want to stud it with. It will be replaced in in the module.
  */
 function run(overrides) {
-	if (overrides) {
-		expressConfig.__set__(overrides);
-	}
-	expressConfig(app, express, server);
+  if (overrides) {
+    expressConfig.__set__(overrides);
+  }
+  expressConfig(app, express, server);
 }
 
 /**
- * @desc Sets NODE_ENV for the tested module to development
+ * @desc Sets NODE_ENV for the tested module to env
  */
-function development() {
-	var p = process;
+function setEnv(env) {
+  const p = process;
 
-	p.env.NODE_ENV = 'development';
+  p.env.NODE_ENV = env;
 
-	expressConfig.__set__({
-		process: p
-	});
+  expressConfig.__set__({
+    process: p,
+  });
 }
 
-/**
- * @desc Sets NODE_ENV for the tested module to production
- */
-function production() {
-	var p = process;
+describe('config/express', () => {
+  /**
+   * @desc resets everything, new duds, it reloads the module, clears any data.
+   */
+  beforeEach(() => {
+    expressConfig = rewire('./express');
+    app = makeAppDud();
+    server = makeServerDud();
+    express = makeExpressDud();
+    setEnv('development');
+  });
 
-	p.env.NODE_ENV = 'production()';
+  it('should export a function', () => {
+    expressConfig.should.be.a('function');
+  });
 
-	expressConfig.__set__({
-		process: p
-	});
-}
+  it('should setup ejs', () => {
+    function ejs() {
+      return 'ejs';
+    }
 
-describe('config/express', function() {
+    run({
+      ejs,
+    });
 
-/**
- * @desc resets everything, new duds, it reloads the module, clears any data.
- */
-beforeEach(function () {
-	expressConfig = rewire('./express');
-	app = makeAppDud();
-	server = makeServerDud();
-	express = makeExpressDud();
-	development();
+    app.__data__.data['view engine'].should.be.exist();
+    app.__data__.data['view engine'].should.be.equal('ejs');
+
+    app.__data__.engines.ejs.should.be.exist();
+    app.__data__.engines.ejs.should.be.equal(ejs);
+  });
+
+  it('should set the views directory', () => {
+    run();
+    app.__data__.data.views.should.exist();
+    fs
+      .existsSync(app.__data__.data.views)
+      .should
+      .be
+      .true('Views Directory Should Exist');
+  });
+
+  describe('app.locals', () => {
+    it('should exist', () => {
+      run();
+      app.locals.should.exist();
+    });
+    it('should have .pkg', () => {
+      run();
+      app.locals.pkg.should.exist();
+    });
+  });
+
+  describe('Middleware', () => {
+    describe('Session', () => {
+      it('should app.use(express-session(args))', () => {
+        function sessionMiddleware(args) {
+          return 'session';
+        }
+
+        run({
+          'session': sessionMiddleware,
+        });
+
+        app.__data__.middlewares.should.contain(sessionMiddleware());
+      });
+
+      it('should generate a unique secret every time', () => {
+        let sessionArgs = {};
+
+        function sessionMiddleware(args) {
+          sessionArgs = args;
+
+          return 'session';
+        }
+
+        run({
+          'session': sessionMiddleware,
+        });
+
+        const oldSecret = sessionArgs.secret;
+
+        run({
+          'session': sessionMiddleware,
+        });
+
+        oldSecret.should.not.equal(sessionArgs.secret);
+      });
+    });
+    describe('Cookie Parser', () => {
+      it('should app.use(express-cookieparser(uniqueSecret))', () => {
+        function cookieParser(secret) {
+          return 'cookiejar';
+        }
+
+        run({
+          'cookieParser': cookieParser,
+        });
+
+        app.__data__.middlewares.should.contain(cookieParser());
+      });
+
+      it('Should always make uniqueSecret unique', () => {
+        let secret;
+
+        function cookieParser(s) {
+          secret = s;
+        }
+
+        run({
+          cookieParser,
+        });
+
+        const oldSecret = secret;
+
+        run({
+          cookieParser,
+        });
+
+        oldSecret.should.not.equal(secret);
+      });
+    });
+    describe('Static Files', () => {
+      describe('express.static', () => {
+        it('Should be called for /vendor/', () => {
+          run();
+          app.__data__.middlewares.should.contain(
+            express.__returns__.static +
+            path.resolve(__dirname, '../vendor'));
+        });
+
+        it('Should be called for /public/', () => {
+          run();
+          app.__data__.middlewares.should.contain(
+            express.__returns__.static +
+            path.resolve(__dirname, '../public'));
+        });
+      });
+    });
+  });
 });
 
-it('should export a function', function () {
-	expressConfig.should.be.a('function');
-});
-
-it('should setup ejs', function () {
-	function ejs() {
-		return 'ejs';
-	}
-
-	run({
-		ejs
-	});
-
-	app.__data__.data['view engine'].should.be.exist();
-	app.__data__.data['view engine'].should.be.equal('ejs');
-
-	app.__data__.engines.ejs.should.be.exist();
-	app.__data__.engines.ejs.should.be.equal(ejs);
-});
-
-it('should set the views directory', function () {
-	run();
-	app.__data__.data.views.should.exist();
-	fs
-		.existsSync(app.__data__.data.views)
-		.should
-		.be
-		.true('Views Directory Should Exist');
-});
-
-describe('app.locals', function () {
-	it('should exist', function() {
-		run();
-		app.locals.should.exist();
-	});
-	it('should have .pkg', function() {
-		run();
-		app.locals.pkg.should.exist();
-	});
-});
-
-describe('Middleware', function () {
-	describe('Session', function () {
-		it('should app.use(express-session(args))', function () {
-
-			var sessionArgs;
-
-			function sessionMiddleware(args) {
-				sessionArgs = args;
-
-				return 'session';
-			}
-
-			run({
-				'session': sessionMiddleware
-			});
-
-			app.__data__.middlewares.should.contain(sessionMiddleware());
-		});
-
-		it('should generate a unique secret every time', function () {
-
-			var sessionArgs = {};
-
-			function sessionMiddleware(args) {
-				sessionArgs = args;
-
-				return 'session';
-			}
-
-			run({
-				'session': sessionMiddleware
-			});
-
-			var oldSecret = sessionArgs.secret;
-
-			run({
-				'session': sessionMiddleware
-			});
-
-			oldSecret.should.not.equal(sessionArgs.secret);
-		});
-	});
-	describe('Cookie Parser', function () {
-		it('should app.use(express-cookieparser(uniqueSecret))', function () {
-
-			function cookieParser(secret) {
-				return 'cookiejar';
-			}
-
-			run({
-				'cookieParser': cookieParser
-			});
-
-			app.__data__.middlewares.should.contain(cookieParser());
-		});
-
-		it('Should always make uniqueSecret unique', function () {
-
-			var secret = '';
-
-			function cookieParser(s) {
-				secret = s;
-			}
-
-			run({
-				cookieParser
-			});
-
-			var oldSecret = secret;
-
-			run({
-				cookieParser
-			});
-
-			oldSecret.should.not.equal(secret);
-		});
-	});
-	describe('Static Files', function () {
-		describe('express.static', function () {
-			it('Should be called for /vendor/', function () {
-				run();
-				app.__data__.middlewares.should.contain(
-					express.__returns__.static +
-					path.resolve(__dirname, '../vendor'));
-			});
-
-			it('Should be called for /public/', function () {
-				run();
-				app.__data__.middlewares.should.contain(
-					express.__returns__.static +
-					path.resolve(__dirname, '../public'));
-
-			});
-		});
-	});
-});
-});
