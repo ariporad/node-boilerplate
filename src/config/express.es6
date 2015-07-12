@@ -7,7 +7,7 @@ import utils from 'utils';
 
 const pkg = pkginfo(module);
 
-module.exports = (app, express) => {
+export default function expressConfig(app, express) {
   app.engine('ejs', ejs);
 
   app.set('view engine', 'ejs');
@@ -29,4 +29,4 @@ module.exports = (app, express) => {
   app.use(express.static(path.resolve(__dirname, '../public')));
   app.use(express.static(path.resolve(__dirname, '../vendor')));
   app.use(cookieParser(utils.generateSecret()));
-};
+}
