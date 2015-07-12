@@ -212,8 +212,7 @@ module.exports = function(grunt) {
 
 		eslint: {
 			node: {
-				src: config.node.es.files.concat(['../Gruntfile.js',
-				                                  '../Gruntconfig.js']),
+				src: config.node.es.files,
 				expand: true,
 				cwd: 'src'
 			},
