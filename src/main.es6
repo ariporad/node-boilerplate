@@ -1,8 +1,9 @@
 /**
- * IMPORTANT: This *must* go before anything and everything else.
- * It emulates a full ES6 environment.
+ * IMPORTANT: These *must* go before anything and everything else.
+ * They emulate a full ES6 environment and allow ES6 error traces.
  */
 import 'babel/polyfill';
+import 'source-map-support/register';
 
 import express from 'express';
 import http from 'http';

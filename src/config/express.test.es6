@@ -229,7 +229,7 @@ describe('config/express', () => {
         }
 
         run({
-          'cookieParser': cookieParser,
+          cookieParser,
         });
 
         app.__data__.middlewares.should.contain(cookieParser());

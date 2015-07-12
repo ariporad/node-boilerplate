@@ -1,4 +1,4 @@
-import utils from './utils';
+import * as utils from './utils';
 
 
 describe('utils', () => {
@@ -35,9 +35,11 @@ describe('utils', () => {
   });
 
   describe('removeDuplicates()', () => {
+    let clean;
+    let dirty;
     beforeEach(() => {
-      this.clean = [1, 2, 3, 4, 5];
-      this.dirty = [1, 2, 3, 4, 5, 1, 5, 3, 2, 4];
+      clean = [1, 2, 3, 4, 5];
+      dirty = [1, 2, 3, 4, 5, 1, 5, 3, 2, 4];
     });
 
     it('Should exist', () => {
@@ -50,17 +52,20 @@ describe('utils', () => {
       utils.removeDuplicates([1, 2, 2, 3]).should.be.an('array');
     });
     it('Should remove the duplicates from an array', () => {
-      utils.removeDuplicates(this.dirty).should.eql(this.clean);
+      utils.removeDuplicates(dirty).should.eql(clean);
     });
     it('Should not modify the original array', () => {
-      const original = this.dirty.slice(0);
-      utils.removeDuplicates(this.dirty);
-      original.should.eql(this.dirty);
+      const original = dirty.slice(0);
+      utils.removeDuplicates(dirty);
+      original.should.eql(dirty);
     });
   });
 
   describe('last()', () => {
-    beforeEach(() => this.array = [1, '2', false, undefined, 5]);
+    let array;
+    beforeEach(() => {
+      array = [1, '2', false, undefined, 5];
+    });
 
     it('Should exist', () => {
       utils.should.have.property('last');
@@ -69,15 +74,15 @@ describe('utils', () => {
       utils.last.should.be.a('function');
     });
     it('Should not return an array', () => {
-      utils.last(this.array).should.not.be.an('array');
+      utils.last(array).should.not.be.an('array');
     });
     it('Should return the last item of the array', () => {
-      utils.last(this.array).should.eql(5);
+      utils.last(array).should.eql(5);
     });
     it('Should not modify the originaly array', () => {
-      const original = this.array.slice(0);
+      const original = array.slice(0);
       utils.last(original);
-      this.array.should.eql(original);
+      array.should.eql(original);
     });
   });
 });
