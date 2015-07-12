@@ -302,8 +302,8 @@ module.exports = function(grunt) {
         tasks: ['watch',
                 'nodemon:dev',
                 'node-inspector:dev',
-                'open:node-inspector',
-                'open:dev'
+          //'open:node-inspector',
+          //'open:dev'
         ]
       }
     },
@@ -314,6 +314,10 @@ module.exports = function(grunt) {
         options: {
           file: 'build/main.js',
           nodeArgs: ['--debug'],
+          ignore: ['node_modules/**/*.*',
+                   'src/**/*.*',
+                   'build/public/**/*.*',
+                   'build/vendor/**/*.*g'],
           env: {}
         }
       }

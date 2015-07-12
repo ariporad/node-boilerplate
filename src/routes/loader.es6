@@ -1,4 +1,5 @@
 import walk from 'findit';
+import { last } from 'lib/utils';
 
 export function _sortModules(modules) {
   return modules.sort((a, b) => {
@@ -15,7 +16,7 @@ export function _processModules(modules, app, express) {
 }
 
 export function _processFilename(modules, filename) {
-  if (filename.split('.').last() === 'js' && filename !== __filename) {
+  if (last(filename.split('.')) === 'js' && filename !== __filename) {
     let name = filename.replace('.js', '');
     name = name.replace(__dirname, '.');
 

@@ -3,7 +3,7 @@ import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import path from 'path';
 import pkginfo from 'pkginfo';
-import utils from 'utils';
+import { generateSecret } from 'lib/utils';
 
 const pkg = pkginfo(module);
 
@@ -20,7 +20,7 @@ export default function expressConfig(app, express) {
   // Middleware
 
   app.use(session({
-    secret: utils.generateSecret(),
+    secret: generateSecret(),
     saveUninitialized: true,
     resave: false,
     // TODO: Setup session store to database (Redis?)
@@ -28,5 +28,5 @@ export default function expressConfig(app, express) {
 
   app.use(express.static(path.resolve(__dirname, '../public')));
   app.use(express.static(path.resolve(__dirname, '../vendor')));
-  app.use(cookieParser(utils.generateSecret()));
+  app.use(cookieParser(generateSecret()));
 }

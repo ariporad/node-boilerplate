@@ -10,7 +10,7 @@ import path from 'path';
 
 import 'config/global'; // Global Config
 import expressConfig from 'config/express';
-import loader from 'routes/loader.es6';
+import loader from 'routes/loader';
 
 const app = express();
 const server = http.createServer(express);
@@ -20,7 +20,9 @@ const server = http.createServer(express);
 expressConfig(app, express, server);
 
 // And finally load the routes
-loader(app, express, path.resolve(__dirname, '/routes'));
+loader(app,
+       express,
+       path.resolve(__dirname, path.resolve(__dirname, 'routes')));
 
 
 server.listen(8080);
