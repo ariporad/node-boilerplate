@@ -14,7 +14,7 @@ export default function expressConfig(app, express) {
   app.set('views', path.resolve(__dirname, '../views'));
 
   app.locals = {
-    pkg: pkg,
+    pkg,
   };
 
   // Middleware

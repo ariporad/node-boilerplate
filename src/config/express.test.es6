@@ -1,7 +1,4 @@
-/* jshint ignore:start */
-/* global describe, it, beforeEach, before, afterEach, after */
-/* jshint ignore:end */
-
+/*global sinon,chai,expect*/
 /**
  * These are the tests for /config/express.es6
  * They run in development, unless you explicitly make them run in production
@@ -19,130 +16,50 @@
 import rewire from 'rewire';
 import path from 'path';
 import fs from 'fs';
-
-// Todo: Sinon!
-
-let expressConfig;
-let app;
-let server;
-let express;
-
-/**
- * @desc Constructor for an express dud.
- */
-function makeExpressDud() {
-  const e = {};
-
-  e.staticFiles = (directory) => {
-    this.__data__.staticDirs.push(directory);
-    return this.__returns__.staticFiles + directory;
-  };
-
-  e.__data__ = { // The passed in data for access later
-    staticDirs: [],
-  };
-
-  e.__returns__ = { // The values returned by the duds
-    staticFiles: 'static:',
-  };
-
-  return e;
-}
-
-/**
- * @desc Constructor for an App Dud.
- */
-function makeAppDud() {
-  const a = {};
-
-  a.set = (key, value) => {
-    this.__data__.data[key] = value;
-    return this.__returns__.set;
-  };
-
-  a.get = (key) => {
-    return this.__data__.data[key];
-  };
-
-  a.use = (middleware) => {
-    this.__data__.middlewares.push(middleware);
-    return this.__returns__.use;
-  };
-
-  a.engine = (name, engine) => {
-    this.__data__.engines[name] = engine;
-    return this.__returns__.engine;
-  };
-
-  a.__data__ = { // The passed in data for access later
-    data: {},
-    middlewares: [],
-    engines: {},
-  };
-
-  a.__returns__ = { // The values returned by the duds
-    set: 'SetAValue',
-    use: 'UseUsetoUseThings',
-    engine: 'V2, V4, V6, V8, V10, V12 or AC Induction?',
-  };
-
-  return a;
-}
-
-/**
- * @desc Constructor function for a server dud
- */
-function makeServerDud() {
-  const s = {};
-
-  // The server is not yet used, so this does nothing.
-
-  s.__data__ = { // The passed in data for access later
-
-  };
-
-  s.__returns__ = { // The Dud values that the methods return.
-
-  };
-
-  return s;
-}
-
-/**
- * @desc Runs expressConfig(app, server, express)
- * @arg Object, Each key should be the name of a global variable, each value
- * what you want to stud it with. It will be replaced in in the module.
- */
-function run(overrides) {
-  if (overrides) {
-    expressConfig.__set__(overrides);
-  }
-  expressConfig(app, express, server);
-}
-
-/**
- * @desc Sets NODE_ENV for the tested module to env
- */
-function setEnv(env) {
-  const p = process;
-
-  p.env.NODE_ENV = env;
-
-  expressConfig.__set__({
-    process: p,
-  });
-}
+import express from 'express';
+import sandbox from 'sinon';
 
 describe('config/express', () => {
+  let app;
+  let expressMock;
+  let appMock;
+  let expressConfig;
+  let sinon;
+  let env;
+
+  /**
+   * @desc Runs expressConfig(app, server, express)
+   * @arg Object, Each key should be the name of a global variable, each value
+   * what you want to stud it with. It will be replaced in in the module.
+   */
+  function run(overrides) {
+    overrides.env = overrides.env || env;
+
+    overrides.process = expressConfig.__get__('process');
+    overrides.process.env.NODE_ENV = env;
+
+    if (overrides) {
+      expressConfig.__set__(overrides);
+    }
+
+    expressConfig(app, express);
+  }
+
   /**
    * @desc resets everything, new duds, it reloads the module, clears any data.
    */
   beforeEach(() => {
     expressConfig = rewire('./express');
-    app = makeAppDud();
-    server = makeServerDud();
-    express = makeExpressDud();
-    setEnv('development');
+
+    app = {};
+    appMock = sinon.mock(app);
+
+    sinon = sandbox.create();
+    env = 'development';
+  });
+
+  afterEach(() => {
+    sinon.restore();
   });
 
   it('should export a function', () => {
@@ -150,19 +67,16 @@ describe('config/express', () => {
   });
 
   it('should setup ejs', () => {
-    function ejs() {
-      return 'ejs';
-    }
+    const ejs = { name: 'ejs', type: 'template engine', __express: () => {} };
+
+    appMock.expects('engine').withExactArgs('ejs', ejs);
+    appMock.expects('set').withExactArgs('view engine', 'ejs');
 
     run({
       ejs,
     });
 
-    app.__data__.data['view engine'].should.be.exist();
-    app.__data__.data['view engine'].should.be.equal('ejs');
-
-    app.__data__.engines.ejs.should.be.exist();
-    app.__data__.engines.ejs.should.be.equal(ejs);
+    appMock.verify();
   });
 
   it('should set the views directory', () => {
