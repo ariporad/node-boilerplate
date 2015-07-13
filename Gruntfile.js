@@ -404,7 +404,7 @@ module.exports = function(grunt) {
         files: {
           expand: true,
           cwd: 'src',
-          src: config.node.tests
+          src: config.node.files
         },
         options: {
           tasks: ['nodeTests']
