@@ -279,14 +279,14 @@ module.exports = function(grunt) {
       },
       // The travis-cov reporter will fail the tests if the
       // coverage falls below the threshold configured in package.json
-      'travis-cov': {
-        options: {
-          reporter: 'travis-cov'
-        },
-        expand: true,
-        src: config.node.js.tests,
-        cwd: 'src'
-      }
+      //'travis-cov': {
+      //  options: {
+      //    reporter: 'travis-cov'
+      //  },
+      //  expand: true,
+      //  src: config.node.js.tests,
+      //  cwd: 'src'
+      //}
     },
 
     //
