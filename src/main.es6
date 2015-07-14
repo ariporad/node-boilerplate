@@ -8,36 +8,33 @@ import 'source-map-support/register';
 import express from 'express';
 import http from 'http';
 import path from 'path';
-import * as Loader from 'auto-load-dir';
+import * as loader from 'auto-load-dir';
 
 import 'config/global'; // Global Config
 import expressConfig from 'config/express';
 
-const app = express();
-const server = http.createServer(express);
-const promises = [];
+const start = module.exports = function start(port) {
+  const app = express();
+  const server = http.createServer(express);
+  const promises = [];
 
-let loader;
+  // Express config
+  expressConfig(app, express, server);
 
-// Express config
-expressConfig(app, express, server);
+  // And finally load the routes
+  promises.push(new Promise((resolve, reject) => {
+    loader(path.resolve(__dirname, 'routes'), [app, express],
+           (err) => err ? reject(err) : resolve());
+  }));
 
-// And finally load the routes
-promises.push(new Promise((resolve, reject) => {
-  loader = new Loader.Loader(path.resolve(__dirname, 'routes'),
-    [app, express], (err) => {
-      return err ? reject(err) : resolve();
-    });
-}));
+  Promise.all(promises).then(() => {
+    server.listen(port);
+    console.log(`Server started on port ${port}.`);
+  }).catch(console.error);
 
-Promise.all(promises).then(() => {
-  server.listen(8080);
-  console.log('server started');
+  module.exports = { app, express, }
+};
 
-  module.exports = {
-    app,
-    server,
-    express,
-    ready: true,
-  };
-}).catch(console.err);
+if (require.main === module) {
+  start(process.env.NODE_ENV);
+}
