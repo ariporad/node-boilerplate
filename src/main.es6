@@ -8,30 +8,36 @@ import 'source-map-support/register';
 import express from 'express';
 import http from 'http';
 import path from 'path';
+import * as Loader from 'auto-load-dir';
 
 import 'config/global'; // Global Config
 import expressConfig from 'config/express';
-import loader from 'routes/loader';
 
 const app = express();
 const server = http.createServer(express);
+const promises = [];
 
+let loader;
 
 // Express config
 expressConfig(app, express, server);
 
 // And finally load the routes
-loader(app,
-       express,
-       path.resolve(__dirname, path.resolve(__dirname, 'routes')));
+promises.push(new Promise((resolve, reject) => {
+  loader = new Loader.Loader(path.resolve(__dirname, 'routes'),
+    [app, express], (err) => {
+      return err ? reject(err) : resolve();
+    });
+}));
 
+Promise.all(promises).then(() => {
+  server.listen(8080);
+  console.log('server started');
 
-server.listen(8080);
-
-console.log('server started');
-
-module.exports = {
-  app,
-  server,
-  express,
-};
+  module.exports = {
+    app,
+    server,
+    express,
+    ready: true,
+  };
+}).catch(console.err);
