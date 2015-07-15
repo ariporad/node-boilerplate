@@ -391,13 +391,13 @@ module.exports = function(grunt) {
           cwd: 'src'
         }
       },
-      //nodeTests: {
-      //  files: config.node.files,
-      //  tasks: ['nodeTests'],
-      //  options: {
-      //    cwd: 'src'
-      //  }
-      //}
+      nodeTests: {
+        files: config.node.files,
+        tasks: ['nodeTests'],
+        options: {
+          cwd: 'src'
+        }
+      }
     }
   });
 
@@ -431,8 +431,13 @@ module.exports = function(grunt) {
                                                         'babel',
                                                         'clean:nodeES'
     ]);
-  grunt.registerTask('nodeTest',
-                     'Compiles the JavaScript files.', ['node',
+  grunt.registerTask('nodeTests',
+                     'Compiles the JavaScript files.', ['eslint:node',
+                                                        'clean:node',
+                                                        'copy:node',
+                                                        'babel',
+                                                        'clean:nodeES',
+                                                        'clean:nodeTests',
                                                         'mochaTest'
     ]);
 
@@ -444,7 +449,7 @@ module.exports = function(grunt) {
                                                         'browserify',
                                                         'clean:client'
     ]);
-  grunt.registerTask('clientTest',
+  grunt.registerTask('clientTests',
                      'Compiles the JavaScript files.', ['eslint:client']);
 
   grunt.registerTask('scripts',
