@@ -8,7 +8,7 @@ import 'source-map-support/register';
 import express from 'express';
 import http from 'http';
 import path from 'path';
-import * as loader from 'auto-load-dir';
+import loader from 'auto-load-dir';
 
 import 'config/global'; // Global Config
 import expressConfig from 'config/express';
@@ -36,5 +36,5 @@ const start = module.exports = function start(port) {
 };
 
 if (require.main === module) {
-  start(process.env.NODE_ENV);
+  start(process.env.PORT);
 }

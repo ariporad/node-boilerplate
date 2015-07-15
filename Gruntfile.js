@@ -314,10 +314,13 @@ module.exports = function(grunt) {
         options: {
           file: 'build/main.js',
           nodeArgs: ['--debug'],
-          ignore: ['node_modules/**/*.*',
-                   'src/**/*.*',
-                   'build/public/**/*.*',
-                   'build/vendor/**/*.*g'],
+          watch: [
+            'src/**/*.js',
+            'src/**/*.es',
+            'src/**/*.es6',
+            '!src/public/**/*.*',
+            '!src/vendor/**/*.*',
+          ],
           env: {}
         }
       }
@@ -353,74 +356,46 @@ module.exports = function(grunt) {
     watch: {
       livereload: {
         options: {
-          livereload: true
+          livereload: true,
         },
         files: [
           'src/public/**/*.{styl,css,js}',
-          'views/**/*.*'
+          'src/views/**/*.*'
         ]
       },
       stylesheets: {
-        files: {
-          expand: true,
-          cwd: 'src',
-          src: config.style.all
-        },
+        files: config.style.all,
         options: {
-          tasks: ['stylesheets']
-        }
+          cwd: 'src'
+        },
+        tasks: ['stylesheets']
       },
       client: {
-        files: {
-          expand: true,
-          cwd: 'src',
-          src: config.client.noTests.concat(config.client.vendor)
-        },
+        files: config.client.noTests.concat(config.client.vendor),
         options: {
-          tasks: ['client']
-        }
+          cwd: 'src'
+        },
+        tasks: ['client']
       },
       clientTests: {
-        files: {
-          expand: true,
-          cwd: 'src',
-          src: config.client.files
-        },
+        files: config.client.files,
+        tasks: ['clientTests'],
         options: {
-          tasks: ['clientTests']
+          cwd: 'src'
         }
       },
       node: {
-        files: {
-          expand: true,
-          cwd: 'src',
-          src: config.node.noTests
-        },
+        files: config.node.noTests,
+        tasks: ['node'],
         options: {
-          tasks: ['node']
+          cwd: 'src'
         }
       },
       nodeTests: {
-        files: {
-          expand: true,
-          cwd: 'src',
-          src: config.node.files
-        },
+        files: config.node.files,
+        tasks: ['nodeTests'],
         options: {
-          tasks: ['nodeTests']
-        }
-      },
-      copy: {
-        files: {
-          src: ['**'].concat(config.negate(
-            config.client.allFiles,
-            config.node.files,
-            config.style.all)),
-          expand: true,
           cwd: 'src'
-        },
-        options: {
-          tasks: ['copy']
         }
       }
     }

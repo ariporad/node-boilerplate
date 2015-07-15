@@ -8,6 +8,5 @@ describe('The Server', () => {
   });
   it('Should create an Express server.', () => {
     main.start(8080);
-    console.log(testing);
   });
 });
