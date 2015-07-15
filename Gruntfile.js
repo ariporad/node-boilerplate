@@ -7,12 +7,6 @@ module.exports = function(grunt) {
                process.env.NODE_ENV ||
                'production');
 
-  grunt.config('sourcemaps', grunt.config('env') === 'development');
-
-  console.log(grunt.config('sourcemaps') ?
-              'Using sourcemaps' :
-              'No sourcemaps');
-
   // configure the tasks
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -62,13 +56,13 @@ module.exports = function(grunt) {
       },
       stylesheets: {
         cwd: 'build',
-        src: config.style.all.concat(config.clean.ignore),
+        src: config.style.all.concat(['public/stylus'], config.clean.ignore),
         expand: true
       },
       client: {
         cwd: 'build',
         src: config.client.allFiles
-          .concat(config.clean.ignore, ['vendor']),
+          .concat(['vendor', 'public/js'], config.clean.ignore),
         expand: true
       },
       node: {
@@ -86,11 +80,6 @@ module.exports = function(grunt) {
         src: config.node.tests.concat(config.clean.ignore),
         expand: true
       },
-      nodeTestsES: {
-        cwd: 'build',
-        src: config.node.es.tests.concat(config.clean.ignore),
-        expand: true
-      },
       clientTests: {
         cwd: 'build',
         src: config.client.tests.concat(config.clean.ignore),
@@ -98,30 +87,36 @@ module.exports = function(grunt) {
       }
     },
 
+
     //
     // Stylesheets
     //
 
     // Compile the Styl(us)
     stylus: {
-      build: {
+      prod: {
+        src: config.style.all.map(function(file) {
+          return 'build/' + file;
+        }),
+        dest: config.bundle + 'css'
+      },
+      dev: {
         options: {
-          sourcemap: (grunt.config('sourcemaps')) ? {
+          sourcemap: {
+            // grunt-contrib-stylus doesn't support external sourcemaps
             inline: true
-          } : false
+          }
         },
         src: config.style.all.map(function(file) {
           return 'build/' + file;
         }),
         dest: config.bundle + 'css'
-      }
+      },
     },
 
     // CSS Postproccessing
     postcss: {
       options: {
-        map: grunt.config('sourcemaps'), // inline sourcemaps
-
         processors: [
           require('pixrem')(), // add fallbacks for rem units
           require('autoprefixer-core')({
@@ -129,15 +124,24 @@ module.exports = function(grunt) {
           }), // add vendor prefixes
           //        			require('cssgrace'),
           require('postcss-font-family')(),
-          require('cssnano')() // minify the result
-        ]
+          require('cssnano')(), // minify the result
+        ],
       },
-      build: {
+      prod: {
         expand: true,
         src: '**/*.css',
         cwd: 'build',
-        dest: 'build'
-      }
+        dest: 'build',
+      },
+      dev: {
+        expand: true,
+        src: '**/*.css',
+        cwd: 'build',
+        dest: 'build',
+        options: {
+          map: true,
+        },
+      },
     },
 
     //
@@ -146,21 +150,27 @@ module.exports = function(grunt) {
 
     // Bundle the client side JS
     browserify: {
-      build: {
+      options: {
+        transform: ['babelify', 'uglifyify'],
+      },
+      prod: {
+        src: 'build/public/js/index.js',
+        dest: config.bundle + 'js',
+      },
+      dev: {
         src: 'build/public/js/index.js',
         dest: config.bundle + 'js',
         options: {
           browserifyOptions: {
-            debug: grunt.config('sourcemaps')
+            debug: true,
           },
-          transform: ['babelify', 'uglifyify']
-        }
+        },
       }
     },
 
     babel: {
       options: {
-        sourceMap: grunt.config('sourcemaps') && 'inline',
+        sourceMap: 'inline',
         resolveModuleSource: function(src, file) {
           var o = (function(source, filename) {
             if (source.indexOf('./') !== -1) return source;
@@ -301,10 +311,7 @@ module.exports = function(grunt) {
         },
         tasks: ['watch',
                 'nodemon:dev',
-                'node-inspector:dev',
-          //'open:node-inspector',
-          //'open:dev'
-        ]
+                'node-inspector:dev',]
       }
     },
 
@@ -336,22 +343,6 @@ module.exports = function(grunt) {
       }
     },
 
-    // Auto open the browser
-    open: {
-      options: {
-        delay: 10 // Rough count/guess as to the startup time
-        // needed.
-      },
-      'node-inspector': {
-        path: 'http://localhost:8081',
-        app: 'Google Chrome'
-      },
-      dev: {
-        path: 'http://localhost:8080/',
-        app: 'Google Chrome'
-      }
-    },
-
     // Watch for changes
     watch: {
       livereload: {
@@ -375,7 +366,7 @@ module.exports = function(grunt) {
         options: {
           cwd: 'src'
         },
-        tasks: ['client']
+        tasks: ['client:dev']
       },
       clientTests: {
         files: config.client.files,
@@ -408,73 +399,98 @@ module.exports = function(grunt) {
   // Tasks
   //
 
-  // Set the ENV
-  grunt.registerTask('env',
-                     'Sets grunt config option env to the suplied argument',
-                     function(env) {
-                       grunt.config('env', env);
-                     });
-
   // Stylesheets
-  grunt.registerTask('stylesheets',
-                     'Compiles the stylesheets.', ['copy:stylesheets',
-                                                   'stylus',
-                                                   'postcss',
-                                                   'clean:stylesheets'
+  grunt.registerTask('stylesheets:dev',
+                     'Compiles the stylesheets. (w/sourcemaps)',
+    ['copy:stylesheets',
+     'stylus:dev',
+     'postcss:dev',
+     'clean:stylesheets'
+    ]);
+  grunt.registerTask('stylesheets:prod', 'Compiles the stylesheets.',
+    ['copy:stylesheets',
+     'stylus:prod',
+     'postcss:prod',
+     'clean:stylesheets'
     ]);
 
   // Node
-  grunt.registerTask('node',
-                     'Compiles the JavaScript files.', ['eslint:node',
-                                                        'clean:node',
-                                                        'copy:node',
-                                                        'babel',
-                                                        'clean:nodeES'
+  grunt.registerTask('node:dev', 'Compiles the JavaScript files.',
+    ['eslint:node',
+     'clean:node',
+     'copy:node',
+     'babel',
+     'clean:nodeES',
     ]);
-  grunt.registerTask('nodeTests',
-                     'Compiles the JavaScript files.', ['eslint:node',
-                                                        'clean:node',
-                                                        'copy:node',
-                                                        'babel',
-                                                        'clean:nodeES',
-                                                        'clean:nodeTests',
-                                                        'mochaTest'
+  // Node always compiles with sourcemaps, so all this does is clean tests too.
+  grunt.registerTask('node:prod', 'Copiles the JavaScript files.',
+    ['node:dev',
+     'clean:nodeTests']);
+  grunt.registerTask('nodeTests', 'Compiles the JavaScript files.',
+    ['node:dev',
+     'mochaTest',
+     'clean:nodeTests',
     ]);
 
   // Client
-  grunt.registerTask('client',
-                     'Compiles the JavaScript files.', ['clean:client',
-                                                        'copy:client',
-                                                        'eslint:client',
-                                                        'browserify',
-                                                        'clean:client'
+  grunt.registerTask('client:dev',
+                     'Compiles the JavaScript files. (w/sourcemaps)',
+    ['clean:client',
+     'copy:client',
+     'eslint:client',
+     'browserify:dev',
+     'clean:client',
     ]);
-  grunt.registerTask('clientTests',
-                     'Compiles the JavaScript files.', ['eslint:client']);
+  grunt.registerTask('client:prod', 'Compiles the JavaScript files.',
+    ['clean:client',
+     'copy:client',
+     'eslint:client',
+     'browserify:prod',
+     'clean:client',
+     'clean:clientTests',
+    ]);
+  grunt.registerTask('clientTests', 'Compiles the JavaScript files.',
+    ['eslint:client']);
 
-  grunt.registerTask('scripts',
-                     'Compiles the JavaScript files.', ['node',
-                                                        'client'
+  grunt.registerTask('scripts:dev',
+                     'Compiles the JavaScript files (w/sourcemaps).',
+    ['node:dev',
+     'client:dev',
+    ]);
+  grunt.registerTask('scripts:prod', 'Compiles the JavaScript files.',
+    ['node:prod',
+     'client:prod',
     ]);
 
-  grunt.registerTask('test',
-                     'Tests all the code', ['nodeTest',
-                                            'clientTest'
+  grunt.registerTask('test', 'Tests all the code',
+    ['nodeTests',
+     'clientTests',
     ]);
 
-  grunt.registerTask('build',
+  grunt.registerTask('build:prod',
                      'Compiles all of the assets and copies the files to ' +
-                     'the build directory.', ['clean:build',
-                                              'copy:build',
-                                              'stylesheets',
-                                              'scripts'
+                     'the build directory.',
+    ['clean',
+     'copy:build',
+     'stylesheets:prod',
+     'scripts:prod',
     ]);
+  grunt.registerTask('build:dev',
+                     'Compiles all of the assets and copies the files to ' +
+                     'the build directory. (w/sourcemaps)',
+    ['clean',
+     'copy:build',
+     'stylesheets:dev',
+     'scripts:dev',
+    ]);
+  grunt.registerTask('build', 'Runs build:prod', 'build:prod');
 
-  grunt.registerTask('default', 'Runs the dev task', ['dev']);
+  grunt.registerTask('default', 'Runs the dev task',
+    ['dev']);
   grunt.registerTask('dev',
                      'Watches the project for changes, automatically builds' +
-                     ' them and runs a server.', ['env:development',
-                                                  'build',
-                                                  'concurrent:dev'
+                     ' them and runs a server.',
+    ['build',
+     'concurrent:dev',
     ]);
 };
