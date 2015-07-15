@@ -4,9 +4,11 @@
  */
 
 module.exports = function index(app, express) {
+  console.log('initalizing /');
+  console.log(app);
+  console.log(express);
   app.get('/', (req, res) => {
-    res.send('Hello World! 1');
-    res.end();
+    res.send('GET request to homepage');
   });
 };
 

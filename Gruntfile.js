@@ -391,13 +391,13 @@ module.exports = function(grunt) {
           cwd: 'src'
         }
       },
-      nodeTests: {
-        files: config.node.files,
-        tasks: ['nodeTests'],
-        options: {
-          cwd: 'src'
-        }
-      }
+      //nodeTests: {
+      //  files: config.node.files,
+      //  tasks: ['nodeTests'],
+      //  options: {
+      //    cwd: 'src'
+      //  }
+      //}
     }
   });
 

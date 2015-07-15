@@ -4,10 +4,13 @@ import session from 'express-session';
 import path from 'path';
 import pkginfo from 'pkginfo';
 import { generateSecret } from 'lib/utils';
+import morgan from 'morgan';
 
 const pkg = pkginfo(module);
 
 export default function expressConfig(app, express) {
+  app.use(morgan('dev'));
+
   app.engine('ejs', ejs);
 
   app.set('view engine', 'ejs');

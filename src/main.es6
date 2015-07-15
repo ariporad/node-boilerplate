@@ -6,7 +6,6 @@ import 'babel/polyfill';
 import 'source-map-support/register';
 
 import express from 'express';
-import http from 'http';
 import path from 'path';
 import loader from 'auto-load-dir';
 
@@ -15,11 +14,12 @@ import expressConfig from 'config/express';
 
 const start = module.exports = function start(port) {
   const app = express();
-  const server = http.createServer(express);
+  // const server = http.createServer(express);
   const promises = [];
 
+
   // Express config
-  expressConfig(app, express, server);
+  expressConfig(app, express);
 
   // And finally load the routes
   promises.push(new Promise((resolve, reject) => {
@@ -27,8 +27,9 @@ const start = module.exports = function start(port) {
            (err) => err ? reject(err) : resolve());
   }));
 
+
   Promise.all(promises).then(() => {
-    server.listen(port);
+    app.listen(port);
     console.log(`Server started on port ${port}.`);
   }).catch(console.error);
 
@@ -36,5 +37,5 @@ const start = module.exports = function start(port) {
 };
 
 if (require.main === module) {
-  start(process.env.PORT);
+  start(process.env.PORT || 8080);
 }
