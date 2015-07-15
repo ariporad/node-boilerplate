@@ -32,7 +32,7 @@ const start = module.exports = function start(port) {
     console.log(`Server started on port ${port}.`);
   }).catch(console.error);
 
-  module.exports = { app, express, }
+  module.exports = { app, express };
 };
 
 if (require.main === module) {
