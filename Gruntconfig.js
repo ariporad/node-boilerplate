@@ -65,7 +65,9 @@ config.dir.node = config.node.dir = 'node';
 config.dir.client = config.client.dir = 'client';
 
 // Only bundle the client
-config.bundle = config.client.bundle = config.dir.build + '/' + config.dir.client + '/bundle.';
+config.bundle =
+  config.client.bundle =
+    config.dir.build + '/' + config.dir.client + '/bundle.';
 
 //
 // Helpers
@@ -76,7 +78,15 @@ var negate = config.negate = makeHelper(function mapNegate(p) {
 
 var prefixPath = config.prefixPath = function prefixPath(path) {
   return makeHelper(function mapPrefix(p) {
-    return path + '/' + p;
+    var out;
+    if (p.indexOf('!') === 0) {
+      var a = p.split('');
+      a[0] = '!' + path + '/';
+      out = a.join('');
+    } else {
+      out = path + '/' + p;
+    }
+    return out;
   });
 };
 
@@ -107,7 +117,8 @@ config.client.files =
   prefixPath(config.dir.client + '/js')(['**/*.js', '**/*.es', '**/*.es6']);
 config.client.tests = prefixPath(config.client.dir)(config.test.patterns);
 config.client.noTests = config.client.files.concat(config.test.ignorePatterns);
-config.client.vendor = prefixPath(config.dir.client + '/vendor')(['**/*.js', '**/*.es', '**/*.es6']);
+config.client.vendor =
+  prefixPath(config.dir.client + '/vendor')(['**/*.js', '**/*.es', '**/*.es6']);
 config.client.allFiles = config.client.files.concat(config.client.vendor);
 
 config.node.ignore = negate(config.client.allFiles);

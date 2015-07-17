@@ -8,6 +8,13 @@ import morgan from 'morgan';
 
 const pkg = pkginfo(module);
 
+/**
+ * @name expressConfig
+ * @desc Configures an express app
+ * @param {Object} app - The app to configure
+ * @param {Object} express - The express instance used to create app.
+ * @returns {undefined} Nothing
+ */
 export default function expressConfig(app, express) {
   app.use(morgan('dev'));
 
@@ -33,3 +40,4 @@ export default function expressConfig(app, express) {
   app.use(express.static(path.resolve(__dirname, '../vendor')));
   app.use(cookieParser(generateSecret()));
 }
+g
