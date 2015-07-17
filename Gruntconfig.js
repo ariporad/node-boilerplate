@@ -56,6 +56,10 @@ var makeHelper = config.makeHelper = function makeHelper(helper) {
 config.dir.dist = 'dist';
 config.dir.build = 'build';
 config.dir.src = 'src';
+config.dir.docs = 'docs';
+
+config.client.docs = config.dir.docs + '/client';
+config.node.docs = config.dir.docs + '/node';
 
 config.dir.node = config.node.dir = 'node';
 config.dir.client = config.client.dir = 'client';

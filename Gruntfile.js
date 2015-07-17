@@ -178,7 +178,8 @@ module.exports = function Gruntfile(grunt) {
                        source].join(' '));
           if (source.indexOf('./') !== -1) return source;
 
-          finalPath = path.resolve(__dirname, config.dir.build, config.dir.node, source);
+          finalPath =
+            path.resolve(__dirname, config.dir.build, config.dir.node, source);
           console.log(finalPath);
 
           if (/.*\..*$/i.test(source)) {
@@ -298,6 +299,22 @@ module.exports = function Gruntfile(grunt) {
       //  src: config.node.js.tests,
       //  cwd: config.dir.build,
       //}
+    },
+
+    // Generate the Docs
+    jsdoc: {
+      node: {
+        src: config.toSrc(config.node.files),
+        options: {
+          destination: config.node.docs,
+        },
+      },
+      client: {
+        src: config.toSrc(config.client.files),
+        options: {
+          destination: config.client.docs,
+        },
+      },
     },
 
     //
@@ -480,6 +497,7 @@ module.exports = function Gruntfile(grunt) {
      'copy:build',
      'stylesheets:dev',
      'scripts:dev',
+     'jsdoc',
     ]);
   grunt.registerTask('build', 'Runs build:prod', 'build:prod');
 
