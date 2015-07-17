@@ -1,3 +1,5 @@
+/*eslint no-var:0, prefer-const:0, no-unused-vars:0*/
+/*eslint-env mocha */
 /**
  * Created by Ari on 7/4/15.
  */

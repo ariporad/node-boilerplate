@@ -1,3 +1,7 @@
+/*global chai,sinon,expect,AssertionError*/
+/*eslint no-var:0, prefer-const:0*/
+/*eslint-env mocha */
+
 import * as utils from './utils';
 
 

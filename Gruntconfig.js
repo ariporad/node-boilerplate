@@ -1,3 +1,5 @@
+// Make ESLint treat this as ES5
+/*eslint no-var:0, prefer-const:0*/
 /**
  * Created by Ari on 7/8/15.
  */
@@ -11,11 +13,11 @@ var config = module.exports = {
   client: {},
   node: {
     js: {},
-    es: {}
+    es: {},
   },
   style: {},
   test: {},
-  nodeInspector: {}
+  nodeInspector: {},
 };
 
 //
@@ -23,8 +25,10 @@ var config = module.exports = {
 //
 var negate = config.negate = function negate(paths) {
   var Paths = [];
-  for (var i = 0; i < arguments.length; i++) {
-    var arg = arguments[i];
+  var arg;
+  var i;
+  for (i = 0; i < arguments.length; i++) {
+    arg = arguments[i];
     switch (typeof arg) {
       case typeof []:
         Paths = Paths.concat(arg);
@@ -37,7 +41,7 @@ var negate = config.negate = function negate(paths) {
     }
   }
 
-  return paths.map(function(p, i, a) {
+  return paths.map(function mapNegate(p) {
     return '!' + p;
   });
 };
@@ -53,7 +57,7 @@ config.clean.ignore = negate([
   config.bundle + '*',
   config.bundle.replace('build/', '') + '*',
   'node_modules/**/*.*',
-  'src/**/*'
+  'src/**/*',
 ]);
 
 
@@ -65,7 +69,7 @@ config.test.ignorePatterns = negate(config.test.patterns);
 
 config.client.files = ['public/**/*.js', 'public/**/*.es', 'public/**/*.es6'];
 config.client.tests =
-  config.test.patterns.map(function(p) { return 'public/' + p; });
+  config.test.patterns.map(function toPublic(p) { return 'public/' + p; });
 config.client.noTests = config.client.files.concat(config.test.ignorePatterns);
 config.client.vendor = ['vendor/**/*.js', 'vendor/**/*.es', 'vendor/**/*.es6'];
 config.client.allFiles = config.client.files.concat(config.client.vendor);
@@ -104,5 +108,3 @@ config.style.all = config.style.stylus.concat(config.style.css);
 // Misc.
 //
 config.nodeInspector.port = 8081;
-
-//console.log(config);

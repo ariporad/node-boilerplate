@@ -1,7 +1,11 @@
+// Make ESLint treat this as ES5
+/*eslint no-var:0, prefer-const:0*/
+
 var config = require('./Gruntconfig');
+var path = require('path');
 
 
-module.exports = function(grunt) {
+module.exports = function Gruntfile(grunt) {
   grunt.config('env',
                grunt.config('env') ||
                process.env.NODE_ENV ||
@@ -27,64 +31,64 @@ module.exports = function(grunt) {
         cwd: 'src',
         src: ['**'],
         dest: 'build',
-        expand: true
+        expand: true,
       },
       client: {
         cwd: 'src',
         src: config.client.allFiles,
         dest: 'build',
-        expand: true
+        expand: true,
       },
       node: {
         cwd: 'src',
         src: config.node.files,
         dest: 'build',
-        expand: true
+        expand: true,
       },
       stylesheets: {
         cwd: 'src',
         src: config.style.stylus,
         dest: 'build',
-        expand: true
-      }
+        expand: true,
+      },
     },
 
     // Clean the build dir
     clean: {
       build: {
-        src: ['build']
+        src: ['build'],
       },
       stylesheets: {
         cwd: 'build',
         src: config.style.all.concat(['public/stylus'], config.clean.ignore),
-        expand: true
+        expand: true,
       },
       client: {
         cwd: 'build',
         src: config.client.allFiles
           .concat(['vendor', 'public/js'], config.clean.ignore),
-        expand: true
+        expand: true,
       },
       node: {
         cwd: 'build',
         src: config.node.files.concat(config.clean.ignore),
-        expand: true
+        expand: true,
       },
       nodeES: {
         cwd: 'build',
         src: config.node.es.files.concat(config.clean.ignore),
-        expand: true
+        expand: true,
       },
       nodeTests: {
         cwd: 'build',
         src: config.node.tests.concat(config.clean.ignore),
-        expand: true
+        expand: true,
       },
       clientTests: {
         cwd: 'build',
         src: config.client.tests.concat(config.clean.ignore),
-        expand: true
-      }
+        expand: true,
+      },
     },
 
 
@@ -95,22 +99,22 @@ module.exports = function(grunt) {
     // Compile the Styl(us)
     stylus: {
       prod: {
-        src: config.style.all.map(function(file) {
+        src: config.style.all.map(function mapStylesToBuildProd(file) {
           return 'build/' + file;
         }),
-        dest: config.bundle + 'css'
+        dest: config.bundle + 'css',
       },
       dev: {
         options: {
           sourcemap: {
             // grunt-contrib-stylus doesn't support external sourcemaps
-            inline: true
-          }
+            inline: true,
+          },
         },
-        src: config.style.all.map(function(file) {
+        src: config.style.all.map(function mapStylesToBuildDev(file) {
           return 'build/' + file;
         }),
-        dest: config.bundle + 'css'
+        dest: config.bundle + 'css',
       },
     },
 
@@ -120,7 +124,7 @@ module.exports = function(grunt) {
         processors: [
           require('pixrem')(), // add fallbacks for rem units
           require('autoprefixer-core')({
-            browsers: '> 5%'
+            browsers: '> 5%',
           }), // add vendor prefixes
           //        			require('cssgrace'),
           require('postcss-font-family')(),
@@ -165,46 +169,47 @@ module.exports = function(grunt) {
             debug: true,
           },
         },
-      }
+      },
     },
 
     babel: {
       options: {
         sourceMap: 'inline',
-        resolveModuleSource: function(src, file) {
-          var o = (function(source, filename) {
-            if (source.indexOf('./') !== -1) return source;
+        resolveModuleSource: function resolveModuleSource(source, filename) {
+          var finalPath;
+          var returnValue;
+          console.log('In resolveModuleSource');
+          console.log(['Input: File:',
+                       filename,
+                       'importing module:',
+                       source].join(' '));
+          if (source.indexOf('./') !== -1) return source;
 
-            var path = __dirname + '/build/' + source;
+          finalPath = path.resolve(__dirname, 'build', source);
 
-            if (/.*\..*$/i.test(source)) {
-              if (grunt.file.exists(path)) {
-                console.log('returning e source');
-                return __dirname + '/build/' + source;
-              } else {
-                return false;
-              }
+          if (/.*\..*$/i.test(source)) {
+            if (grunt.file.exists(path)) {
+              console.log('returning e source');
+              returnValue = finalPath;
             } else {
-              if (grunt.file.exists(path + '.js') ||
-                  grunt.file.exists(path + '.es') ||
-                  grunt.file.exists(path + '.es6') ||
-                  grunt.file.exists(path + '.json')) {
-                console.log('returning path');
-                return path;
-              } else {
-                console.log('returning source');
-                return source;
-              }
+              returnValue = false;
             }
-          })(src, file);
+          } else {
+            if (grunt.file.exists(path + '.js') ||
+                grunt.file.exists(path + '.es') ||
+                grunt.file.exists(path + '.es6') ||
+                grunt.file.exists(path + '.json')) {
+              console.log('returning path');
+              returnValue = finalPath;
+            } else {
+              console.log('returning source');
+              returnValue = source;
+            }
+          }
 
-          console.log('Input: File ' +
-                      file +
-                      ' importing module ' +
-                      src);
-          console.log('Output: ' + o);
-          return o;
-        }
+          console.log(['Output:', returnValue, '\n'].join(' '));
+          return returnValue;
+        },
       },
       files: {
         expand: true,
@@ -212,8 +217,8 @@ module.exports = function(grunt) {
         dest: 'build',
         src: config.node.es.files,
         ext: '.js',
-        extDot: 'last'
-      }
+        extDot: 'last',
+      },
     },
 
     //
@@ -222,19 +227,21 @@ module.exports = function(grunt) {
 
     eslint: {
       node: {
-        src: config.node.es.files,
+        src: config.node.es.files.concat(['../Gruntfile.js',
+                                          '../Gruntconfig.js',
+                                          '../test.*.js']),
         expand: true,
-        cwd: 'src'
+        cwd: 'src',
       },
       client: {
         src: config.client.files,
         expand: true,
-        cwd: 'src'
-      }
+        cwd: 'src',
+      },
     },
 
     // Lint the JS files
-    //jshint: {
+    // jshint: {
     //	options: {
     //		lastsemic: true, // Allows function(){ return 'Something' }
     //		// <--
@@ -264,28 +271,28 @@ module.exports = function(grunt) {
     //			jquery: true // Obvious, jQuery stuff such as $
     //		}
     //	}
-    //},
+    // },
 
     // Test the Nodecode™
     mochaTest: {
       test: {
         options: {
           reporter: 'spec',
-          require: './test.setup.js'
+          require: './test.setup.js',
         },
         expand: true,
         src: config.node.js.tests,
-        cwd: 'build'
+        cwd: 'build',
       },
       coverage: {
         options: {
           reporter: 'html-cov',
           quiet: true,
-          captureFile: 'coverage.html'
+          captureFile: 'coverage.html',
         },
         expand: true,
         src: config.node.js.tests,
-        cwd: 'build'
+        cwd: 'build',
       },
       // The travis-cov reporter will fail the tests if the
       // coverage falls below the threshold configured in package.json
@@ -307,12 +314,12 @@ module.exports = function(grunt) {
     concurrent: {
       dev: {
         options: {
-          logConcurrentOutput: true
+          logConcurrentOutput: true,
         },
         tasks: ['watch',
                 'nodemon:dev',
-                'node-inspector:dev',]
-      }
+                'node-inspector:dev'],
+      },
     },
 
     // Automagiaclly restart the server when something changes.
@@ -328,9 +335,9 @@ module.exports = function(grunt) {
             '!src/public/**/*.*',
             '!src/vendor/**/*.*',
           ],
-          env: {}
-        }
-      }
+          env: {},
+        },
+      },
     },
     // Debug Nodecode™
     'node-inspector': {
@@ -338,9 +345,9 @@ module.exports = function(grunt) {
         options: {
           'web-port': config.nodeInspector.port,
           'save-live-edit': true,
-          'hidden': ['node_modules']
-        }
-      }
+          'hidden': ['node_modules'],
+        },
+      },
     },
 
     // Watch for changes
@@ -351,45 +358,45 @@ module.exports = function(grunt) {
         },
         files: [
           'src/public/**/*.{styl,css,js}',
-          'src/views/**/*.*'
-        ]
+          'src/views/**/*.*',
+        ],
       },
       stylesheets: {
         files: config.style.all,
         options: {
-          cwd: 'src'
+          cwd: 'src',
         },
-        tasks: ['stylesheets']
+        tasks: ['stylesheets'],
       },
       client: {
         files: config.client.noTests.concat(config.client.vendor),
         options: {
-          cwd: 'src'
+          cwd: 'src',
         },
-        tasks: ['client:dev']
+        tasks: ['client:dev'],
       },
       clientTests: {
         files: config.client.files,
         tasks: ['clientTests'],
         options: {
-          cwd: 'src'
-        }
+          cwd: 'src',
+        },
       },
       node: {
         files: config.node.noTests,
         tasks: ['node'],
         options: {
-          cwd: 'src'
-        }
+          cwd: 'src',
+        },
       },
       nodeTests: {
         files: config.node.files,
         tasks: ['nodeTests'],
         options: {
-          cwd: 'src'
-        }
-      }
-    }
+          cwd: 'src',
+        },
+      },
+    },
   });
 
   // load the plugins
@@ -405,13 +412,13 @@ module.exports = function(grunt) {
     ['copy:stylesheets',
      'stylus:dev',
      'postcss:dev',
-     'clean:stylesheets'
+     'clean:stylesheets',
     ]);
   grunt.registerTask('stylesheets:prod', 'Compiles the stylesheets.',
     ['copy:stylesheets',
      'stylus:prod',
      'postcss:prod',
-     'clean:stylesheets'
+     'clean:stylesheets',
     ]);
 
   // Node
