@@ -12,6 +12,13 @@ import loader from 'auto-load-dir';
 import 'config/global'; // Global Config
 import expressConfig from 'config/express';
 
+/**
+ * @name start
+ * @desc Starts the server on port {port}
+ * @param {Number} port - The port to start the server on.
+ * @returns {undefined} Nothing
+ * @type {Function}
+ */
 const start = module.exports = function start(port) {
   const app = express();
   // const server = http.createServer(express);
@@ -32,8 +39,6 @@ const start = module.exports = function start(port) {
     app.listen(port);
     console.log(`Server started on port ${port}.`);
   }).catch(console.error);
-
-  module.exports = { app, express };
 };
 
 if (require.main === module) {
