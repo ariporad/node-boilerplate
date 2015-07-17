@@ -20,35 +20,32 @@ module.exports = function Gruntfile(grunt) {
     //
 
     // Copy files from src to build
-    // It's a very concious design decision to copy everything here,
-    // and
-    // do all of everything in build/. It clearly sperates the build
-    // and
-    // the source. You'll notice that even the patterns are only for
-    // build as there is no need to every do anything in src/.
+    // It's a very conscious design decision to copy everything here,
+    // and do all of everything in build/. It clearly separates the build
+    // and the source.
     copy: {
       build: {
-        cwd: 'src',
+        cwd: config.dir.src,
+        dest: config.dir.build,
         src: ['**'],
-        dest: 'build',
         expand: true,
       },
       client: {
-        cwd: 'src',
+        cwd: config.dir.src,
+        dest: config.dir.build,
         src: config.client.allFiles,
-        dest: 'build',
         expand: true,
       },
       node: {
-        cwd: 'src',
+        cwd: config.dir.src,
+        dest: config.dir.build,
         src: config.node.files,
-        dest: 'build',
         expand: true,
       },
       stylesheets: {
-        cwd: 'src',
+        cwd: config.dir.src,
+        dest: config.dir.build,
         src: config.style.stylus,
-        dest: 'build',
         expand: true,
       },
     },
@@ -56,36 +53,36 @@ module.exports = function Gruntfile(grunt) {
     // Clean the build dir
     clean: {
       build: {
-        src: ['build'],
+        src: [config.dir.build],
       },
       stylesheets: {
-        cwd: 'build',
-        src: config.style.all.concat(['public/stylus'], config.clean.ignore),
+        cwd: config.dir.build,
+        src: config.style.all.concat(['client/stylus'], config.clean.ignore),
         expand: true,
       },
       client: {
-        cwd: 'build',
+        cwd: config.dir.build,
         src: config.client.allFiles
-          .concat(['vendor', 'public/js'], config.clean.ignore),
+          .concat(['client/vendor', 'client/js'], config.clean.ignore),
         expand: true,
       },
       node: {
-        cwd: 'build',
+        cwd: config.dir.build,
         src: config.node.files.concat(config.clean.ignore),
         expand: true,
       },
       nodeES: {
-        cwd: 'build',
+        cwd: config.dir.build,
         src: config.node.es.files.concat(config.clean.ignore),
         expand: true,
       },
       nodeTests: {
-        cwd: 'build',
+        cwd: config.dir.build,
         src: config.node.tests.concat(config.clean.ignore),
         expand: true,
       },
       clientTests: {
-        cwd: 'build',
+        cwd: config.dir.build,
         src: config.client.tests.concat(config.clean.ignore),
         expand: true,
       },
@@ -99,9 +96,7 @@ module.exports = function Gruntfile(grunt) {
     // Compile the Styl(us)
     stylus: {
       prod: {
-        src: config.style.all.map(function mapStylesToBuildProd(file) {
-          return 'build/' + file;
-        }),
+        src: config.toBuild(config.style.all),
         dest: config.bundle + 'css',
       },
       dev: {
@@ -111,9 +106,7 @@ module.exports = function Gruntfile(grunt) {
             inline: true,
           },
         },
-        src: config.style.all.map(function mapStylesToBuildDev(file) {
-          return 'build/' + file;
-        }),
+        src: config.toBuild(config.style.all),
         dest: config.bundle + 'css',
       },
     },
@@ -126,7 +119,6 @@ module.exports = function Gruntfile(grunt) {
           require('autoprefixer-core')({
             browsers: '> 5%',
           }), // add vendor prefixes
-          //        			require('cssgrace'),
           require('postcss-font-family')(),
           require('cssnano')(), // minify the result
         ],
@@ -134,14 +126,14 @@ module.exports = function Gruntfile(grunt) {
       prod: {
         expand: true,
         src: '**/*.css',
-        cwd: 'build',
-        dest: 'build',
+        cwd: config.dir.build,
+        dest: config.dir.build,
       },
       dev: {
         expand: true,
         src: '**/*.css',
-        cwd: 'build',
-        dest: 'build',
+        cwd: config.dir.build,
+        dest: config.dir.build,
         options: {
           map: true,
         },
@@ -158,11 +150,11 @@ module.exports = function Gruntfile(grunt) {
         transform: ['babelify', 'uglifyify'],
       },
       prod: {
-        src: 'build/public/js/index.js',
+        src: config.toBuild(config.client.mainFile),
         dest: config.bundle + 'js',
       },
       dev: {
-        src: 'build/public/js/index.js',
+        src: config.toBuild(config.client.mainFile),
         dest: config.bundle + 'js',
         options: {
           browserifyOptions: {
@@ -178,6 +170,7 @@ module.exports = function Gruntfile(grunt) {
         resolveModuleSource: function resolveModuleSource(source, filename) {
           var finalPath;
           var returnValue;
+          if (filename.indexOf('node_modules') > -1) return source;
           console.log('In resolveModuleSource');
           console.log(['Input: File:',
                        filename,
@@ -185,7 +178,8 @@ module.exports = function Gruntfile(grunt) {
                        source].join(' '));
           if (source.indexOf('./') !== -1) return source;
 
-          finalPath = path.resolve(__dirname, 'build', source);
+          finalPath = path.resolve(__dirname, config.dir.build, config.dir.node, source);
+          console.log(finalPath);
 
           if (/.*\..*$/i.test(source)) {
             if (grunt.file.exists(path)) {
@@ -195,10 +189,10 @@ module.exports = function Gruntfile(grunt) {
               returnValue = false;
             }
           } else {
-            if (grunt.file.exists(path + '.js') ||
-                grunt.file.exists(path + '.es') ||
-                grunt.file.exists(path + '.es6') ||
-                grunt.file.exists(path + '.json')) {
+            if (grunt.file.exists(finalPath + '.js') ||
+                grunt.file.exists(finalPath + '.es') ||
+                grunt.file.exists(finalPath + '.es6') ||
+                grunt.file.exists(finalPath + '.json')) {
               console.log('returning path');
               returnValue = finalPath;
             } else {
@@ -213,8 +207,8 @@ module.exports = function Gruntfile(grunt) {
       },
       files: {
         expand: true,
-        cwd: 'build',
-        dest: 'build',
+        cwd: config.dir.build,
+        dest: config.dir.build,
         src: config.node.es.files,
         ext: '.js',
         extDot: 'last',
@@ -231,12 +225,12 @@ module.exports = function Gruntfile(grunt) {
                                           '../Gruntconfig.js',
                                           '../test.*.js']),
         expand: true,
-        cwd: 'src',
+        cwd: config.dir.src,
       },
       client: {
         src: config.client.files,
         expand: true,
-        cwd: 'src',
+        cwd: config.dir.src,
       },
     },
 
@@ -282,7 +276,7 @@ module.exports = function Gruntfile(grunt) {
         },
         expand: true,
         src: config.node.js.tests,
-        cwd: 'build',
+        cwd: config.dir.build,
       },
       coverage: {
         options: {
@@ -292,7 +286,7 @@ module.exports = function Gruntfile(grunt) {
         },
         expand: true,
         src: config.node.js.tests,
-        cwd: 'build',
+        cwd: config.dir.build,
       },
       // The travis-cov reporter will fail the tests if the
       // coverage falls below the threshold configured in package.json
@@ -302,7 +296,7 @@ module.exports = function Gruntfile(grunt) {
       //  },
       //  expand: true,
       //  src: config.node.js.tests,
-      //  cwd: 'src'
+      //  cwd: config.dir.build,
       //}
     },
 
@@ -326,19 +320,17 @@ module.exports = function Gruntfile(grunt) {
     nodemon: {
       dev: {
         options: {
-          file: 'build/main.js',
+          file: '<%=pkg.main%>',
           nodeArgs: ['--debug'],
-          watch: [
-            'src/**/*.js',
-            'src/**/*.es',
-            'src/**/*.es6',
-            '!src/public/**/*.*',
-            '!src/vendor/**/*.*',
-          ],
+          watch: config.toSrc('**/*.js',
+                              '**/*.es',
+                              '**/*.es6',
+                              config.node.ignore),
           env: {},
         },
       },
     },
+
     // Debug Nodecode™
     'node-inspector': {
       dev: {
@@ -357,21 +349,20 @@ module.exports = function Gruntfile(grunt) {
           livereload: true,
         },
         files: [
-          'src/public/**/*.{styl,css,js}',
-          'src/views/**/*.*',
+          config.client.dir + '/**/*.{styl,css,js}',
         ],
       },
       stylesheets: {
         files: config.style.all,
         options: {
-          cwd: 'src',
+          cwd: config.dir.src,
         },
         tasks: ['stylesheets'],
       },
       client: {
         files: config.client.noTests.concat(config.client.vendor),
         options: {
-          cwd: 'src',
+          cwd: config.dir.src,
         },
         tasks: ['client:dev'],
       },
@@ -379,21 +370,21 @@ module.exports = function Gruntfile(grunt) {
         files: config.client.files,
         tasks: ['clientTests'],
         options: {
-          cwd: 'src',
+          cwd: config.dir.src,
         },
       },
       node: {
         files: config.node.noTests,
         tasks: ['node'],
         options: {
-          cwd: 'src',
+          cwd: config.dir.src,
         },
       },
       nodeTests: {
         files: config.node.files,
         tasks: ['nodeTests'],
         options: {
-          cwd: 'src',
+          cwd: config.dir.src,
         },
       },
     },
@@ -477,7 +468,7 @@ module.exports = function Gruntfile(grunt) {
   grunt.registerTask('build:prod',
                      'Compiles all of the assets and copies the files to ' +
                      'the build directory.',
-    ['clean',
+    ['clean:build',
      'copy:build',
      'stylesheets:prod',
      'scripts:prod',
@@ -485,7 +476,7 @@ module.exports = function Gruntfile(grunt) {
   grunt.registerTask('build:dev',
                      'Compiles all of the assets and copies the files to ' +
                      'the build directory. (w/sourcemaps)',
-    ['clean',
+    ['clean:build',
      'copy:build',
      'stylesheets:dev',
      'scripts:dev',
