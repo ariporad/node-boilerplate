@@ -1,0 +1,8 @@
+{
+  "source": {
+    "include": ["src/node"],
+    "exclude": ["node_modules"],
+    "includePattern": "(.*\\.(js|es6|es)(doc)?)",
+    "excludePattern": ".*\\/?(node_modules|vendor)\\/.*"
+  }
+}
